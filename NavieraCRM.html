@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Navieras — Base de Contactos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #171b25;
+  --bg3: #1e2333;
+  --bg4: #252b3d;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8eaf0;
+  --text2: #8b92a8;
+  --text3: #545c75;
+  --accent: #4d7cfe;
+  --accent2: #2d5ce8;
+  --green: #2ecc8a;
+  --green-bg: rgba(46,204,138,0.1);
+  --amber: #f5a623;
+  --amber-bg: rgba(245,166,35,0.1);
+  --red: #ff5c5c;
+  --red-bg: rgba(255,92,92,0.1);
+  --blue: #4d7cfe;
+  --blue-bg: rgba(77,124,254,0.1);
+  --purple: #a855f7;
+  --purple-bg: rgba(168,85,247,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; position: sticky; top: 0; z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.logo-text { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.header-stats { display: flex; gap: 1.5rem; }
+.hstat { text-align: center; }
+.hstat-num { font-size: 18px; font-weight: 600; color: var(--accent); font-family: 'DM Mono', monospace; }
+.hstat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* LAYOUT */
+.layout { display: flex; height: calc(100vh - 60px); }
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px; flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 1rem;
+}
+.sidebar-section { margin-bottom: 1.5rem; }
+.sidebar-title { font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; padding-left: 4px; }
+.filter-btn {
+  width: 100%; text-align: left; padding: 7px 10px; border-radius: 6px;
+  border: none; background: none; color: var(--text2); font-size: 13px;
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.filter-btn:hover { background: var(--bg3); color: var(--text); }
+.filter-btn.active { background: var(--blue-bg); color: var(--accent); font-weight: 500; }
+.filter-count {
+  font-size: 11px; background: var(--bg4); border-radius: 10px;
+  padding: 1px 7px; font-family: 'DM Mono', monospace;
+}
+.filter-btn.active .filter-count { background: var(--accent); color: white; }
+
+/* MAIN */
+.main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* TOOLBAR */
+.toolbar {
+  padding: 1rem 1.5rem; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; color: var(--text3); }
+#searchInput {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 12px 9px 38px;
+  color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif;
+  outline: none; transition: border 0.2s;
+}
+#searchInput:focus { border-color: var(--accent); }
+#searchInput::placeholder { color: var(--text3); }
+
+.view-toggle { display: flex; background: var(--bg3); border-radius: 8px;
+  border: 1px solid var(--border); overflow: hidden; }
+.view-btn { padding: 8px 14px; border: none; background: none; color: var(--text3);
+  cursor: pointer; font-size: 13px; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.view-btn.active { background: var(--accent); color: white; }
+.results-label { font-size: 13px; color: var(--text3); white-space: nowrap; }
+
+/* TABLE VIEW */
+.table-container { flex: 1; overflow: auto; padding: 0 1.5rem 1.5rem; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 3px; margin-top: 1rem; }
+thead th {
+  text-align: left; font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0 14px 8px; position: sticky; top: 0; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+tbody tr {
+  background: var(--bg2); border-radius: 8px; cursor: pointer;
+  transition: background 0.1s;
+}
+tbody tr:hover { background: var(--bg3); }
+tbody td {
+  padding: 11px 14px; font-size: 13px; color: var(--text);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+tbody td:first-child { border-left: 1px solid var(--border); border-radius: 8px 0 0 8px; }
+tbody td:last-child { border-right: 1px solid var(--border); border-radius: 0 8px 8px 0; }
+
+/* CARDS VIEW */
+.cards-container { flex: 1; overflow: auto; padding: 1.5rem; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.card-empresa { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.card-persona { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.card-fields { display: flex; flex-direction: column; gap: 5px; }
+.card-field { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--text2); }
+.card-field-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.card-field-val { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+  display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* BADGES */
+.badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500;
+  white-space: nowrap;
+}
+.badge-directo { background: var(--green-bg); color: var(--green); }
+.badge-linkedin { background: var(--blue-bg); color: var(--blue); }
+.badge-campana { background: var(--amber-bg); color: var(--amber); }
+.badge-crm { background: var(--purple-bg); color: var(--purple); }
+.badge-intl { background: rgba(100,100,255,0.1); color: #8899ff; }
+.badge-pendiente { background: var(--red-bg); color: var(--red); }
+
+/* DETAIL PANEL */
+.detail-panel {
+  width: 380px; flex-shrink: 0; background: var(--bg2);
+  border-left: 1px solid var(--border); overflow-y: auto;
+  transform: translateX(100%); transition: transform 0.25s ease;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-header {
+  padding: 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.detail-empresa { font-size: 18px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.detail-persona { font-size: 14px; color: var(--text2); margin-top: 4px; }
+.detail-cargo { font-size: 12px; color: var(--text3); }
+.close-btn { background: var(--bg3); border: none; color: var(--text2);
+  width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.close-btn:hover { background: var(--bg4); color: var(--text); }
+.detail-body { padding: 1.5rem; }
+.detail-section { margin-bottom: 1.5rem; }
+.detail-section-title { font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.detail-field { margin-bottom: 10px; }
+.detail-field-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+.detail-field-val { font-size: 13px; color: var(--text); line-height: 1.5; word-break: break-word; }
+.detail-field-val a { color: var(--accent); text-decoration: none; }
+.detail-field-val a:hover { text-decoration: underline; }
+.copy-btn {
+  font-size: 11px; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); padding: 3px 8px; border-radius: 5px; cursor: pointer;
+  margin-left: 6px; vertical-align: middle; font-family: 'DM Sans', sans-serif;
+}
+.copy-btn:hover { background: var(--bg4); color: var(--text); }
+.notes-box {
+  background: var(--bg3); border-radius: 8px; padding: 12px;
+  font-size: 13px; color: var(--text2); line-height: 1.6; border: 1px solid var(--border);
+}
+
+/* EMPTY */
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text3); gap: 10px; padding: 3rem; text-align: center; }
+.empty-icon { font-size: 48px; opacity: 0.3; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .detail-panel { width: 100%; position: fixed; top: 60px; right: 0; height: calc(100vh - 60px); z-index: 50; }
+  .header-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">⚓</div>
+    <div class="logo-text">NavieraCRM</div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-num" id="totalCount">0</div><div class="hstat-label">Contactos</div></div>
+    <div class="hstat"><div class="hstat-num" id="empresasCount">0</div><div class="hstat-label">Empresas</div></div>
+    <div class="hstat"><div class="hstat-num" id="emailCount">0</div><div class="hstat-label">Con email</div></div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Fuente</div>
+      <button class="filter-btn active" data-filter="fuente" data-val="all" onclick="setFilter('fuente','all',this)">
+        Todos <span class="filter-count" id="fc-all">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="Contacto directo" onclick="setFilter('fuente','Contacto directo',this)">
+        Contacto directo <span class="filter-count" id="fc-cd">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="CRM" onclick="setFilter('fuente','CRM',this)">
+        CRM / Seguimiento <span class="filter-count" id="fc-crm">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="Campaña España" onclick="setFilter('fuente','Campaña España',this)">
+        Campaña España <span class="filter-count" id="fc-ce">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="Campaña masiva" onclick="setFilter('fuente','Campaña masiva',this)">
+        Campaña masiva <span class="filter-count" id="fc-cm">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="Base internacional" onclick="setFilter('fuente','Base internacional',this)">
+        Base internacional <span class="filter-count" id="fc-bi">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="Pendientes" onclick="setFilter('fuente','Pendientes',this)">
+        Pendientes <span class="filter-count" id="fc-pe">0</span>
+      </button>
+      <button class="filter-btn" data-filter="fuente" data-val="Linkedin" onclick="setFilter('fuente','Linkedin',this)">
+        LinkedIn <span class="filter-count" id="fc-li">0</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Tiene</div>
+      <button class="filter-btn" data-filter="has" data-val="email" onclick="setFilter('has','email',this)">
+        ✉ Con email
+      </button>
+      <button class="filter-btn" data-filter="has" data-val="telefono" onclick="setFilter('has','telefono',this)">
+        📞 Con teléfono
+      </button>
+      <button class="filter-btn" data-filter="has" data-val="persona" onclick="setFilter('has','persona',this)">
+        👤 Con contacto
+      </button>
+      <button class="filter-btn" data-filter="has" data-val="notas" onclick="setFilter('has','notas',this)">
+        📝 Con notas
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar empresa, persona, email, teléfono, notas…" oninput="onSearch()">
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnTable" onclick="setView('table')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18M3 9h18M3 15h18M3 21h18M9 3v18M15 3v18"/></svg>
+          Tabla
+        </button>
+        <button class="view-btn" id="btnCards" onclick="setView('cards')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Tarjetas
+        </button>
+      </div>
+      <span class="results-label" id="resultsLabel">0 resultados</span>
+      <button onclick="exportCSV()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;">
+        ↓ Exportar CSV
+      </button>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div class="table-container" id="tableView">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('empresa')" style="cursor:pointer">Empresa ↕</th>
+            <th onclick="sortBy('persona')" style="cursor:pointer">Persona ↕</th>
+            <th>Cargo</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th onclick="sortBy('ultimo_contacto')" style="cursor:pointer">Último contacto ↕</th>
+            <th>Fuente</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- CARDS VIEW -->
+    <div class="cards-container" id="cardsView" style="display:none;">
+      <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div>
+        <div class="detail-empresa" id="dEmpresa">—</div>
+        <div class="detail-persona" id="dPersona"></div>
+        <div class="detail-cargo" id="dCargo"></div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">Contacto</div>
+        <div class="detail-field">
+          <div class="detail-field-label">Email</div>
+          <div class="detail-field-val" id="dEmail">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Teléfono</div>
+          <div class="detail-field-val" id="dTelefono">—</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Información</div>
+        <div class="detail-field">
+          <div class="detail-field-label">Último contacto</div>
+          <div class="detail-field-val" id="dContacto">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">País</div>
+          <div class="detail-field-val" id="dPais">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Fuente</div>
+          <div class="detail-field-val" id="dFuente">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="detail-field-label">Estado</div>
+          <div class="detail-field-val" id="dEstado">—</div>
+        </div>
+      </div>
+      <div class="detail-section" id="dNotasSection">
+        <div class="detail-section-title">Notas</div>
+        <div class="notes-box" id="dNotas"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RAW_DATA = [{"empresa": "Comibersa, S.A.", "persona": "Severino Alvarez Llaneza", "telefono": "639 22 04 45", "email": "salvarezl@comibersa.masaveu.com", "ultimo_contacto": "4 Febrero 2026", "cargo": "", "notas": "pertenece a Grupo Masaveu llevan buques de Cementos Tudela Veguin", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Ocmis Maritime", "persona": "Ali Halabi", "telefono": "34 964 84 34 55", "email": "ali@ocmis.es", "ultimo_contacto": "9 Febrero 2026", "cargo": "", "notas": "visité en persona 09Feb. Cliente de Adam.", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Alphaship", "persona": "Edgar Carnero", "telefono": "34 661 460 898 - 24/7: 34 928 247 978", "email": "edgar.carnero@alfaship.com", "ultimo_contacto": "9 Febrero 2026", "cargo": "", "notas": "contactar de nuevo - llamar", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Bunge SA", "persona": "Martin Hugel", "telefono": "", "email": "martin.hugel@bunge.com", "ultimo_contacto": "19 Marzo 2026", "cargo": "Head of Procurement", "notas": "", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Dorian LPG", "persona": "Peter Kraefting", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "Bunker Procurement", "notas": "", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Chimbusco Pan Nation", "persona": "Janice  Kwok", "telefono": "", "email": "janice.kwok@chim-pn.com", "ultimo_contacto": "19 Marzo 2026", "cargo": "Bunker Sales Director Europe", "notas": "", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Hafnia", "persona": "Matias Engel", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "Senior Manager bunkers", "notas": "", "estado": "", "fuente": "Contacto directo", "pais": ""}, {"empresa": "Boluda Shipping", "persona": "", "telefono": "", "email": "operations@boluda.com.es, fleet@boluda.com.es", "ultimo_contacto": "19 Enero", "cargo": "", "notas": "rebotaron los dos correos", "estado": "rebotaron los dos correos", "fuente": "Chatgpt", "pais": ""}, {"empresa": "Boluda Shipping", "persona": "", "telefono": "", "email": "nao.hokura@boluda.com.es", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Boluda Shipping", "persona": "", "telefono": "", "email": "juanvicente.rogel@boluda.com.es", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Boluda Shipping", "persona": "", "telefono": "", "email": "valencia@boluda.com.es", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Boluda Shipping", "persona": "", "telefono": "", "email": "milleri@valencia@boluda.com.es", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Suardiaz", "persona": "Guillermo Pastor Garcia", "telefono": "", "email": "purchasing@suardiaz.com; technical@suardiaz.com", "ultimo_contacto": "19 Enero", "cargo": "", "notas": "Me acept'o hoy y envi'e msj introductorio a ver si me incluye en cotizaciones. | Suardiaz Group, Navimed y Transcoma son del mismo grupo empresarial al parecer", "estado": "Me acept'o hoy y envi'e msj introductorio a ver si me incluye en cotizaciones.", "fuente": "Linkedin", "pais": ""}, {"empresa": "Balearia", "persona": "Rafael Rolo Gonzalez", "telefono": "", "email": "technical@balearia.com; operations@balearia.com; fleet@balearia.com", "ultimo_contacto": "", "cargo": "Director General Operaciones de flota de Bale'aria", "notas": "envi'e mails", "estado": "envi'e mails", "fuente": "Chatgpt", "pais": ""}, {"empresa": "Balearia", "persona": "Alberto Monteavaro Perez", "telefono": "", "email": "", "ultimo_contacto": "19 Enero", "cargo": "fleet supervisor Balearia", "notas": "Me dio responsible de bunker", "estado": "Me dio responsible de bunker", "fuente": "Linkedin", "pais": ""}, {"empresa": "Balearia", "persona": "Juan Cabrera", "telefono": "", "email": "juan.Cabrera@balearia.com", "ultimo_contacto": "19 Enero", "cargo": "RESPONSABLE Bunker", "notas": "Esperando respuesta via correo", "estado": "Esperando respuesta via correo", "fuente": "referido por Alberto Monteavaro", "pais": ""}, {"empresa": "Naviera Armas", "persona": "fue comprada por Balearia", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Ibaizabal Group", "persona": "Jorge Lancastre Zickermann", "telefono": "", "email": "shippingm@ibaizabal.org", "ultimo_contacto": "19 Enero", "cargo": "Chief Executive Officer", "notas": "esperando me acepte", "estado": "esperando me acepte", "fuente": "Linkedin", "pais": ""}, {"empresa": "SASEMAR", "persona": "", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Spring Marine", "persona": "Jorge Marrero", "telefono": "", "email": "info@sprimgmarine.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Freddy Cardenas", "pais": ""}, {"empresa": "Tankers International (UK) limited", "persona": "Sylvia Papa", "telefono": "", "email": "bunkers@tankers.uk.com", "ultimo_contacto": "26 Enero", "cargo": "", "notas": "", "estado": "", "fuente": "linkedin", "pais": ""}, {"empresa": "Rahamut Enterprises Limited", "persona": "Terry Kirpaul", "telefono": "", "email": "terry_kirpaul@rahamutgroup.com", "ultimo_contacto": "26 Enero", "cargo": "", "notas": "", "estado": "", "fuente": "GF Bunkertrade", "pais": ""}, {"empresa": "ADM", "persona": "Sean Jordan", "telefono": "", "email": "", "ultimo_contacto": "26 Enero", "cargo": "Senior Ops manager", "notas": "pregunté correo corporativo", "estado": "pregunté correo corporativo", "fuente": "Linkedin", "pais": ""}, {"empresa": "Frontier Marine", "persona": "", "telefono": "", "email": "contactus@frontier-marine.com", "ultimo_contacto": "28 Enero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Marguisa", "persona": "Ángel Nogueira", "telefono": "+34 91 571 95 21", "email": "a.nogueira@marguisa.com", "ultimo_contacto": "19 Marzo", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Marguisa", "persona": "Adrián Escudero", "telefono": "+34 649 39 32 98", "email": "a.escudero@marguisa.com", "ultimo_contacto": "19 Marzo", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "E&S Tankers", "persona": "David Jones", "telefono": "", "email": "escrib'i", "ultimo_contacto": "02 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "Linkedin", "pais": ""}, {"empresa": "E&S Tankers", "persona": "Timon Spreckels", "telefono": "", "email": "", "ultimo_contacto": "19 Marzo", "cargo": "", "notas": "", "estado": "", "fuente": "Linkedin", "pais": ""}, {"empresa": "Naviera Transoceanica", "persona": "", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Oakcity Tuna Fishing Corporation S.A. de C. V.", "persona": "", "telefono": "", "email": "macarena.ubis@ctmcorporation.com", "ultimo_contacto": "", "cargo": "EL SALVADOR", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Alfaship", "persona": "Edgar Carnero", "telefono": "34 928 247 978", "email": "edgar.carnero@alfaship.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "Gastón | laspalmas@alfaship.com", "estado": "Gastón", "fuente": "CRM", "pais": ""}, {"empresa": "Algetransit", "persona": "Antonio Perea Gil", "telefono": "34 658 760 236", "email": "antonioperea@algetransit.es", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "represetación aduanera, no fletan buques", "estado": "represetación aduanera, no fletan buques", "fuente": "CRM", "pais": ""}, {"empresa": "Aman Forwarding", "persona": "Gregorio Fernandez", "telefono": "34 661 249 692", "email": "gfernandez@amanforwarding.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "no chartean barcos", "estado": "no chartean barcos", "fuente": "CRM", "pais": ""}, {"empresa": "Consignaciones Toro y Betolaza", "persona": "Gorka Zabala", "telefono": "34 94 425 26 00", "email": "gorka.zabala@torobe.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Caralb Maritima", "persona": "Ana Vives Gomez", "telefono": "34 627 322 945", "email": "marketing@caralb.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "no chartean barcos pero les puedo pasar presentación para sus clientes | marketing@caralb.com", "estado": "no chartean barcos pero les puedo pasar presentación para sus clientes", "fuente": "CRM", "pais": ""}, {"empresa": "Cargo club", "persona": "Montse Nomen Brotons", "telefono": "", "email": "montsenomen@cargoclub.es", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "cargo wine", "persona": "David Merci", "telefono": "34 932 41 9010", "email": "david@cargowine.com.es", "ultimo_contacto": "9 Febrero", "cargo": "ops manager", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "DECOEXSA", "persona": "Sofia Aguirre", "telefono": "34 916 710 915", "email": "marketing@decoexsa.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "respondió y no tienen barcos", "estado": "respondió y no tienen barcos", "fuente": "CRM", "pais": ""}, {"empresa": "EIMSKIP SPAIN", "persona": "Eva Ortiz", "telefono": "34 986 116 069", "email": "eof@eimskip.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "se maneja desde Islandia | 00354 525 7000 Sicfus \"we are well covered\"", "estado": "se maneja desde Islandia", "fuente": "CRM", "pais": ""}, {"empresa": "Eshipping", "persona": "Juan Francisco", "telefono": "34 635 666 091", "email": "jf@eshipping.es", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Green Iberica", "persona": "Enrique Salazar Ahedo", "telefono": "34 944 209 024", "email": "esalazar@greeniberica.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "JCV Shipping", "persona": "Oscar Calvo", "telefono": "34 976 221 961", "email": "ocalvo@jcvshipping.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "ycalvo@jcvshipping.com | no compran bunkers", "estado": "ycalvo@jcvshipping.com", "fuente": "CRM", "pais": ""}, {"empresa": "Kaleido Logistics", "persona": "Jose Martinez", "telefono": "34 986 447 475", "email": "kaleido@kaleidologistics.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Logistic Company Vesta", "persona": "Juan Antonio Villa Sánchez", "telefono": "34 684 465 675", "email": "j.villa@lcvesta.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "19 Marzo", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Marguisa Shipping", "persona": "Andres Cadenas", "telefono": "34 91 572 06 45", "email": "marguisa@marguisa.com", "ultimo_contacto": "OJO revisar antes enviar", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Mosca Maritimo", "persona": "Antonio García Saiz", "telefono": "", "email": "antonio.garcia@elmosca.es", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "MPG Tránsitos S.A.U., known as MPG Logistics, is a company belonging to the Pérez y Cía", "persona": "Paco Calomarde", "telefono": "34 96 367 43 17", "email": "paco.calomarde@groupmpg.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Perez Torres Marìtima", "persona": "Pedro Pérez-Torres Calvar", "telefono": "34 986 388 770", "email": "pedropt@ptmar.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "986838057, opción 1(esp) opc 6 (fletamento) | ferrol@pptmar.com", "estado": "986838057, opción 1(esp) opc 6 (fletamento)", "fuente": "CRM", "pais": ""}, {"empresa": "Ravello Forwarding", "persona": "Gabriel Ravello", "telefono": "34 679 426 032", "email": "gabriel.ravello@ravello.es", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Suardiaz", "persona": "Arturo Fernández", "telefono": "34 91 431 66 40", "email": "arturo.fernandez@suardiaz.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Transporte Ferri e hijos", "persona": "Jesús Ferri Sánchez", "telefono": "34 650 441 175", "email": "jesus_ferri@ferriehijos.net", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Transvolando", "persona": "Manuel Vicente", "telefono": "34 659 024 660", "email": "manuel@transvolando.es", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Transmed", "persona": "Jana Peiró", "telefono": "34 677 551 055", "email": "jana.peiro@trasmedgle.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Tudefrigo Logistica", "persona": "SANTIAGO CORNEJO", "telefono": "34 661 486 781", "email": "santiago.cornejo@tudefrigo.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "XPO Logistics", "persona": "Carlos Rivero", "telefono": "34 942 352 352", "email": "carlos.rivero@xpo.com", "ultimo_contacto": "9 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "ARES Shipping", "persona": "", "telefono": "90 216 504 48 74", "email": "technic@aresship.com", "ultimo_contacto": "11 Febrero", "cargo": "", "notas": "mandé email", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Serport SAS", "persona": "Deliana Lacayo", "telefono": "57 316 525 6278", "email": "", "ultimo_contacto": "11 Febrero", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "Noatum Maritime Spain, S.A. – T", "persona": "", "telefono": "34 964 28 33 44", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "CRM", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "ship@atun.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "2kship@2k.com.tr", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "shipping@gabmarine.com.eg", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "abbaglobalco@yahoo.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "abm-image@centrin.net.id", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "info@acsmships.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "management@admibros.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "crew@adriatico.gr", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "afa@afa.com.tr", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "info@3moshipping-trading.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "apa@apanda.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "aarema@philonline.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "infocy@ahrenkiel.net", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "alkmare@hol.gr", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "le dieron click a rechazar en su lista de correos en la empresa", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "crew@alncc.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "aesm.ant@angloeasterngroup.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "infoadsteamuk@adsteam.co.uk", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "inc-miami@interorient.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "alsa@dm.net.lb", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "leoships@vsnl.net", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "alcyon@otenet.gr", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "office@kronshipping.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "info@maritimeservices.demon.co.uk", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "info@matchtech.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "mckenna@eircom.net", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "medfin@eurofingroup.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "info@meesa.com.eg", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "mmai920@aol.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "marine@marine-profile.se", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "master@eurocom.od.ul", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "mrm@mrm.net", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "info@msimalta.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "email enviado", "fuente": "Campaña masiva", "pais": ""}, {"empresa": "ATLÁNTICO SHIPPING, S.L.", "persona": "Andu Argiñarena", "telefono": "94 600 40 62", "email": "'chartering@atlantico-shipping.com' / andu@muruetaatlantico.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "el correo de chartering se devolviò por ser interno, pero existe. | hablé con Jaione el 21 Enero y me dijo reenviar correo a Mikel, van al norte de Africa y dentro de Europa | follow up enviado 2 Feb", "estado": "el correo de chartering se devolviò por ser interno, pero existe.", "fuente": "Campaña España", "pais": "España"}, {"empresa": "Balearia", "persona": "", "telefono": "", "email": "ya le envié", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "BERNHARD SCHULTE CANARIAS", "persona": "", "telefono": "", "email": "servando.luis@schultegroup.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "follow up enviado 2 Feb", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "Boluda Lines", "persona": "", "telefono": "", "email": "ya le envié", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "CEMENTOS TUDELA VEGUÍN, S.A.U.", "persona": "Juan Egochea", "telefono": "98 598 11 00", "email": "jegocheagal@ctv.masaveu.com / 'jpalicio@ctv.masaveu.com'", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "el 2do mail no existe | Respondi'o Severino el 4 Feb", "estado": "el 2do mail no existe", "fuente": "Campaña España", "pais": "España"}, {"empresa": "DE POLI TANKERS SPAIN, S.A", "persona": "", "telefono": "", "email": "la empresa ya no existe", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "Petrogas", "persona": "", "telefono": "922 23 87 00", "email": "viktoria.guseva@disagrupo.es", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "volver a llamar", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "EMPRESA NAVIERA ELCANO, S.A.", "persona": "ops@navieraelcano.es", "telefono": "91 536 98 00", "email": "info@navieraelcano.es / elcano@navieraelcano.es", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "la cta info@ no existe | hablé con Antonio y me dio el mail de operaciones pero me dijo que ya tenìan quien les compre.", "estado": "la cta info@ no existe", "fuente": "Campaña España", "pais": "España"}, {"empresa": "ERSHIP S.A", "persona": "", "telefono": "91 426 34 00", "email": "chart@ership.com / jaime.nafria@ership.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "follow up 2 Feb", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "FLOTA SUARDIAZ, S.L.", "persona": "", "telefono": "", "email": "flotasuardiaz@suardiaz.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "se devolviò por ser interno | contactado el 18 Enero linkedin, hoy pedí su correo", "estado": "se devolviò por ser interno", "fuente": "Campaña España", "pais": "España"}, {"empresa": "FRED OLSEN S.A", "persona": "", "telefono": "", "email": "lineas@fredolsen.es", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "FRS, S.L.U", "persona": "", "telefono": "+34 634 713 702", "email": "info@frs.es <info@frs.es> / opsupervisor.es@dfds.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "GRUPO ARMAS TRASMEDITERRÁNEA", "persona": "", "telefono": "", "email": "narmas@naviera–armas.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "no existe", "estado": "no existe", "fuente": "Campaña España", "pais": "España"}, {"empresa": "GRUPO IBAIZABAL", "persona": "", "telefono": "+34 91 521 06 71", "email": "shippingm@ibaizabalms.com / aitoraznar@ibaizabalms.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "MARFLET MARINE", "persona": "", "telefono": "", "email": "marfletmarine@marfletmarine.com / ops@marfletmarine.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "MURELOIL, SAU", "persona": "Rafael Sanchez Quirós", "telefono": "", "email": "mureloil@mureloil.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "NAVIERA ALVARGONZÁLEZ, S.A", "persona": "", "telefono": "", "email": "info@alvargonzalez.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "NAVIERA DE GALICIA", "persona": "pedidos@navigasa.com", "telefono": "", "email": "navigasa@navigasa.com / trafico@macogasa.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "VOLANS MARITIME", "persona": "", "telefono": "34 645 59 19 33", "email": "operations@volans-lg.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": "España"}, {"empresa": "", "persona": "Vitranschart", "telefono": "+84 64 853426", "email": "vtc-vt@hcm.vnn.vn", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Vietnam"}, {"empresa": "", "persona": "", "telefono": "+91 461 235 2235", "email": "vilsons@sancharnet.in", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "", "persona": "", "telefono": "+44 20 7489 0088", "email": "vships.london@vships.com / enquiries@vgrouplimited.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "United Kingdom"}, {"empresa": "", "persona": "", "telefono": "+91 22 5635 0100", "email": "secretarial@varunship.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "", "persona": "", "telefono": "+852 2528 5095", "email": "vomhk@vom.com.hk", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Hong Kong"}, {"empresa": "", "persona": "", "telefono": "+971 6 534 9492", "email": "vigil@emirates.net.ae", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "United Arab Emirates"}, {"empresa": "", "persona": "", "telefono": "+91 461 235 2235", "email": "vilsons@sancharnet.in", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "", "persona": "", "telefono": "+49 40 822 2650", "email": "fleet@vbsk.de", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Germany"}, {"empresa": "", "persona": "", "telefono": "+1 604 687 3288", "email": "vancouver@vallesfleet.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Canada"}, {"empresa": "", "persona": "", "telefono": "+91 11 5160 8505", "email": "vsch@delhi.varunship.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "", "persona": "", "telefono": "", "email": "cv@lapamarine.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Netherlands"}, {"empresa": "The Netherlands", "persona": "Milko Meijer", "telefono": "+31 10 285 85 21 / +31 10 285 8585", "email": "owners@vertom.nl", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "", "persona": "Robert Heemskerk", "telefono": "+31 (0)10 285 85 30 / +31 6 15 42 29 34", "email": "tankers@vertom.nl", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "The Netherlands", "persona": "", "telefono": "+31 10 285 8700", "email": "info@vertraco.nl", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "", "persona": "", "telefono": "+44 1304 240881", "email": "info@vikingrecruitment.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "United Kingdom"}, {"empresa": "", "persona": "", "telefono": "+91 461 233 6815", "email": "vinothshipping@gmail.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "", "persona": "", "telefono": "+49 421 36810", "email": "marine@burgergroup.de", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Germany"}, {"empresa": "", "persona": "", "telefono": "+370 631 3054", "email": "volfra@klaipeda.omnitel.net", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Lithuania"}, {"empresa": "", "persona": "", "telefono": "+63 2 526 1032", "email": "vom@vom-group.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Philippines"}, {"empresa": "Vernicos Shpg Ents, Byron E", "persona": "", "telefono": "+30 210 453 3608", "email": "bev@ath.forthnet.gr", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Greece"}, {"empresa": "Vertom Scheepvaart", "persona": "", "telefono": "+31 10 285 8585", "email": "operations@vertom.nl", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Netherlands"}, {"empresa": "Vilsons Shipping Pvt Ltd", "persona": "", "telefono": "+91 461 235 2840", "email": "info@vilship.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "U.Ships Auckland", "persona": "", "telefono": "+64 2 173 5248", "email": "auckland@uships.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "New Zealand"}, {"empresa": "Udya Shipping Pvt Ltd", "persona": "", "telefono": "+91 22 5591 2240", "email": "admin@udyashipping.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "Unicom Management Svcs Ltd", "persona": "", "telefono": "+357 2589 0000", "email": "info@unicom-cy.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Cyprus"}, {"empresa": "Unicorn Shipping Services Ltd", "persona": "", "telefono": "+880 31 712483", "email": "unicorn@globalctg.net", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Bangladesh"}, {"empresa": "Unigas Intl Inc - Texas", "persona": "", "telefono": "+1 713 952 0065", "email": "Ops@unigasusa.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "Office@unigas.nl", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "", "persona": "", "telefono": "", "email": "office@unigas.hk", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Union Transport Group Plc", "persona": "", "telefono": "+44 20 8290 1234", "email": "utg.plc@uniontransport.co.uk", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "United Kingdom"}, {"empresa": "United Bulk Carriers", "persona": "", "telefono": "+1 610 995 2600", "email": "pjorgensen@unitedbulkcarriers.com", "ultimo_contacto": "", "cargo": "", "notas": "agregué: 'chartering@unitedbulkcarriers.com'; 'operations@unitedbulkcarriers.com'", "estado": "", "fuente": "Base internacional", "pais": "United States"}, {"empresa": "United Liner Agencies of India", "persona": "", "telefono": "+91 22 2263 1393", "email": "ula@bom2.vsnl.net.in", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "Univan Ship Management Ltd", "persona": "", "telefono": "+852 2527 0058", "email": "office@univan.com.hk", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Hong Kong"}, {"empresa": "Universal Shpg Svc-Chittagong", "persona": "", "telefono": "+880 31 725808", "email": "info@universalmarinectg.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Bangladesh"}, {"empresa": "Ugland Companies, J J", "persona": "", "telefono": "+47 37 29 26 00", "email": "jjuc@jjuc.no", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Norway"}, {"empresa": "Union Commercial Inc", "persona": "", "telefono": "+30 210 428 3747", "email": "unioncom@hol.gr", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Greece"}, {"empresa": "nisea Holdings Ltd", "persona": "", "telefono": "+357 2576 0311", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Cyprus"}, {"empresa": "United Maritime A N Bournakis", "persona": "", "telefono": "+30 210 451 4767", "email": "unitedbo@onenet.gr", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Greece"}, {"empresa": "Universal Shipbrokers", "persona": "", "telefono": "+92 21 241 1493", "email": "universalshipbrokers@cyber.net.pk", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Pakistan"}, {"empresa": "Ulrik Qvale & Partners AS", "persona": "", "telefono": "+47 22 51 16 16", "email": "qvale.partners@uqp.no", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Norway"}, {"empresa": "Uniteam Marine Ltd", "persona": "", "telefono": "+357 2584 6100", "email": "info@uniteammarine.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Cyprus"}, {"empresa": "United Liner Agencies of India", "persona": "", "telefono": "+91 44 2524 9350", "email": "chennai@ulaindia.com", "ultimo_contacto": "", "cargo": "", "notas": "1er email", "estado": "", "fuente": "Base internacional", "pais": "India"}, {"empresa": "United Shpg & Trading Co", "persona": "", "telefono": "+30 210 428 3660", "email": "mngmnt-utrade@ath.forthnet.gr", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Greece"}, {"empresa": "Universal Shipping Svcs", "persona": "", "telefono": "+880 2 955 6929", "email": "uss@bracbd.net", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": "Bangladesh"}, {"empresa": "NAVIERA MURUETA, S.A.", "persona": "", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "es la misma gente de Atlantico Shipping, Naviera Elcano", "estado": "pendiente", "fuente": "Pendientes", "pais": ""}, {"empresa": "NAVINORTE, S.A.", "persona": "", "telefono": "", "email": "broker@gjunquera.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "pendiente", "fuente": "Pendientes", "pais": ""}, {"empresa": "TRANSPORTES MARITIMOS ALCUDIA S.A", "persona": "", "telefono": "", "email": "tma@tmalcudia.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "pendiente", "fuente": "Pendientes", "pais": ""}, {"empresa": "Bergé Logistics", "persona": "", "telefono": "", "email": "shipping@bergelogistics.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "pendiente", "fuente": "Pendientes", "pais": ""}, {"empresa": "TANKERS International (UK) limited", "persona": "Sylvia Papa", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "Linkedin", "estado": "pendiente", "fuente": "Pendientes", "pais": ""}, {"empresa": "Naviera Transoceanica", "persona": "", "telefono": "", "email": "", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Pendientes", "pais": ""}, {"empresa": "Volans", "persona": "", "telefono": "", "email": "operations@volans-lg.com", "ultimo_contacto": "", "cargo": "", "notas": "", "estado": "", "fuente": "Campaña España", "pais": ""}, {"empresa": "Zodiac Consulting Group", "persona": "", "telefono": "+34 628 105732", "email": "zodiac_group@walla.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "rebot'o", "estado": "rebot'o", "fuente": "Base internacional", "pais": ""}, {"empresa": "Zodiac Maritime", "persona": "", "telefono": "", "email": "general@zodiac-maritime.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "+44 (0)20 7333 2222", "estado": "+44 (0)20 7333 2222", "fuente": "Base internacional", "pais": ""}, {"empresa": "ZNT International", "persona": "", "telefono": "+880 31 810342", "email": "raihanctg@bbts.net", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "envi'e contacto por formulario de p'agina web", "estado": "envi'e contacto por formulario de p'agina web", "fuente": "Base internacional", "pais": ""}, {"empresa": "Zirex Ltd", "persona": "", "telefono": "+381 82 301030", "email": "bzlok@cg.yu", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "rebot'o", "estado": "rebot'o", "fuente": "Base internacional", "pais": ""}, {"empresa": "Zihni Denizcilik ve Ticaret AS", "persona": "", "telefono": "+90 212 251 1515", "email": "operation@zihni.com.tr", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Zhoushan Oriental Co Ltd", "persona": "", "telefono": "+86 580 202 8445", "email": "zoetc@mail.zsptt.zj.cn", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "rebot'o", "estado": "rebot'o", "fuente": "Base internacional", "pais": ""}, {"empresa": "Zeus Maritime Srl", "persona": "", "telefono": "+51 1 578 5599 ", "email": "zeus@zeusmaritime.com.pe", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "ellos no compran combustible, entregan provisiones mar[itimas", "estado": "ellos no compran combustible, entregan provisiones mar[itimas", "fuente": "Base internacional", "pais": ""}, {"empresa": "Yuzhny Shipping Agency INFLOT", "persona": "", "telefono": "+380 48 259 3777", "email": "office@inflot.yuzhny.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "rebot'o", "estado": "rebot'o", "fuente": "Base internacional", "pais": ""}, {"empresa": "Yuzhny INFLOT", "persona": "", "telefono": "+380 48 259 3777", "email": "infyuzop@odtel.net", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Yantai Seaview Shipping", "persona": "", "telefono": "info@yantaiseaviewshipping.com", "email": "bigvessel@ytseaview.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "REBOT[O", "estado": "REBOT[O", "fuente": "Base internacional", "pais": ""}, {"empresa": "Yangon Maritime Svcs Co Ltd", "persona": "", "telefono": "+95 1 256949", "email": "yangonmaritime@mptmail.net.mm", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Yalta INFLOT", "persona": "", "telefono": "+380 65 427 1872", "email": "yal.inflot@tn.odessa.ua", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Yagil Maritime Consultancy", "persona": "", "telefono": "+27 31 301 8584", "email": "giladi@global.co.za", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Wallem Ltd", "persona": "", "telefono": "+44 20 8390 1377", "email": "enquiries@wallem.com / vits@wallem.com / wsmuk@wallem.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Wallem Maritime Services", "persona": "", "telefono": "+63 2 527 7991", "email": "admin@walcrew.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Wallenius Marine AB", "persona": "", "telefono": "", "email": "info@walleniusmarine.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Correo:", "persona": "", "telefono": "", "email": "goran.soderdahl@walleniusmarine.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Correo:", "persona": "", "telefono": "+46 8 772 0500", "email": "johan.mattsson@walleniusmarine.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Wavecrest Ltd Glen Humble FICS, FIFP – Director", "persona": "", "telefono": "", "email": "", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Correo:", "persona": "", "telefono": "", "email": "glen@wavecrest.co.uk / charlie@wavecrest.co.uk / info@wavecrest.co.uk", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Waves Group of Companies", "persona": "", "telefono": "+65 8608 7521", "email": "geral@wavemarin.com / brasil@wavemarin.com / sales@wavemarinesolutions.com / info@wavemarinegroup.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Weco Agencia Maritima SA", "persona": "", "telefono": "+34 93 304 3154", "email": "weco@weco.es / sales@weco.es / weco@bcn.servicom.es", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Weco Shipping IS", "persona": "", "telefono": "+45 45 17 77 77(", "email": "wecoshipping@wecoshipping.com / tank@wecoshipping.dk / rlu@wecoshipping.com / jvi@wecobulk.com / jsc@wecotankers.com", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}, {"empresa": "Rahamut Enterprises Limited", "persona": "", "telefono": "", "email": "", "ultimo_contacto": "Enero 2026", "cargo": "", "notas": "", "estado": "", "fuente": "Base internacional", "pais": ""}];
+
+// Normalize fuente for filtering
+const DATA = RAW_DATA.map((r, i) => ({...r, _id: i,
+  fuente: normalFuente(r.fuente)
+}));
+
+function normalFuente(f) {
+  if (!f) return 'CRM';
+  const fl = f.toLowerCase();
+  if (fl.includes('directo') || fl.includes('direct')) return 'Contacto directo';
+  if (fl.includes('linkedin')) return 'Linkedin';
+  if (fl.includes('campañ') || fl.includes('masiva')) return 'Campaña masiva';
+  if (fl.includes('espa')) return 'Campaña España';
+  if (fl.includes('internac')) return 'Base internacional';
+  if (fl.includes('pendient')) return 'Pendientes';
+  if (fl.includes('crm') || fl.includes('chatgpt') || fl.includes('bunkertrade') || fl.includes('referido') || fl.includes('freddy')) return 'CRM';
+  return f;
+}
+
+let currentFilter = { fuente: 'all', has: null };
+let currentSort = { col: null, asc: true };
+let currentView = 'table';
+let selectedId = null;
+let filtered = [];
+
+// Stats
+const empresasSet = new Set(DATA.filter(r => r.empresa).map(r => r.empresa.toLowerCase()));
+document.getElementById('totalCount').textContent = DATA.length;
+document.getElementById('empresasCount').textContent = empresasSet.size;
+document.getElementById('emailCount').textContent = DATA.filter(r => r.email && r.email.includes('@')).length;
+
+// Filter counts
+const countByFuente = (val) => val === 'all'
+  ? DATA.length
+  : DATA.filter(r => r.fuente === val || (val === 'CRM' && !['Contacto directo','Linkedin','Campaña masiva','Campaña España','Base internacional','Pendientes'].includes(r.fuente))).length;
+
+document.getElementById('fc-all').textContent = countByFuente('all');
+document.getElementById('fc-cd').textContent = countByFuente('Contacto directo');
+document.getElementById('fc-crm').textContent = countByFuente('CRM');
+document.getElementById('fc-ce').textContent = countByFuente('Campaña España');
+document.getElementById('fc-cm').textContent = countByFuente('Campaña masiva');
+document.getElementById('fc-bi').textContent = countByFuente('Base internacional');
+document.getElementById('fc-pe').textContent = countByFuente('Pendientes');
+document.getElementById('fc-li').textContent = countByFuente('Linkedin');
+
+function getSearchQuery() {
+  return document.getElementById('searchInput').value.toLowerCase().trim();
+}
+
+function applyFilters() {
+  const q = getSearchQuery();
+  filtered = DATA.filter(r => {
+    // Fuente filter
+    if (currentFilter.fuente !== 'all') {
+      if (r.fuente !== currentFilter.fuente) return false;
+    }
+    // Has filter
+    if (currentFilter.has === 'email' && !r.email?.includes('@')) return false;
+    if (currentFilter.has === 'telefono' && !r.telefono) return false;
+    if (currentFilter.has === 'persona' && !r.persona) return false;
+    if (currentFilter.has === 'notas' && !r.notas) return false;
+    // Search
+    if (q) {
+      const hay = [r.empresa, r.persona, r.email, r.telefono, r.notas, r.cargo, r.pais, r.estado].join(' ').toLowerCase();
+      if (!q.split(' ').every(t => hay.includes(t))) return false;
+    }
+    return true;
+  });
+
+  if (currentSort.col) {
+    filtered.sort((a, b) => {
+      const av = (a[currentSort.col] || '').toLowerCase();
+      const bv = (b[currentSort.col] || '').toLowerCase();
+      return currentSort.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+  }
+
+  document.getElementById('resultsLabel').textContent = `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`;
+  render();
+}
+
+function badgeClass(fuente) {
+  const f = (fuente||'').toLowerCase();
+  if (f.includes('directo')) return 'badge-directo';
+  if (f.includes('linkedin')) return 'badge-linkedin';
+  if (f.includes('campañ') || f.includes('masiva')) return 'badge-campana';
+  if (f.includes('internac')) return 'badge-intl';
+  if (f.includes('pendient')) return 'badge-pendiente';
+  return 'badge-crm';
+}
+
+function render() {
+  if (currentView === 'table') renderTable();
+  else renderCards();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text3)">Sin resultados para esta búsqueda</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(r => `
+    <tr onclick="openDetail(${r._id})">
+      <td title="${esc(r.empresa)}" style="font-weight:500">${esc(r.empresa) || '<span style=\"color:var(--text3)\">—</span>'}</td>
+      <td title="${esc(r.persona)}">${esc(r.persona) || '<span style=\"color:var(--text3)\">—</span>'}</td>
+      <td title="${esc(r.cargo)}" style="color:var(--text2);font-size:12px">${esc(r.cargo) || ''}</td>
+      <td title="${esc(r.email)}" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${r.email ? `<a href="mailto:${esc(r.email.split('/')[0].trim())}" onclick="event.stopPropagation()">${esc(r.email)}</a>` : '<span style=\"color:var(--text3)\">—</span>'}</td>
+      <td title="${esc(r.telefono)}" style="font-family:'DM Mono',monospace;font-size:12px">${esc(r.telefono) || '<span style=\"color:var(--text3)\">—</span>'}</td>
+      <td style="font-size:12px;color:var(--text2)">${esc(r.ultimo_contacto) || ''}</td>
+      <td><span class="badge ${badgeClass(r.fuente)}">${esc(r.fuente)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)">Sin resultados</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(r => `
+    <div class="card" onclick="openDetail(${r._id})">
+      <div class="card-top">
+        <div>
+          <div class="card-empresa">${esc(r.empresa) || '<em style="color:var(--text3);font-size:12px">Sin empresa</em>'}</div>
+          ${r.persona ? `<div class="card-persona">👤 ${esc(r.persona)}</div>` : ''}
+        </div>
+        <span class="badge ${badgeClass(r.fuente)}">${esc(r.fuente)}</span>
+      </div>
+      <div class="card-fields">
+        ${r.email ? `<div class="card-field"><span class="card-field-icon">✉</span><span class="card-field-val" title="${esc(r.email)}">${esc(r.email)}</span></div>` : ''}
+        ${r.telefono ? `<div class="card-field"><span class="card-field-icon">📞</span><span class="card-field-val">${esc(r.telefono)}</span></div>` : ''}
+        ${r.pais ? `<div class="card-field"><span class="card-field-icon">🌍</span><span class="card-field-val">${esc(r.pais)}</span></div>` : ''}
+        ${r.ultimo_contacto ? `<div class="card-field"><span class="card-field-icon">📅</span><span class="card-field-val">${esc(r.ultimo_contacto)}</span></div>` : ''}
+      </div>
+      ${r.notas ? `<div class="card-footer"><div style="font-size:11px;color:var(--text2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.notas)}</div></div>` : ''}
+    </div>
+  `).join('');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openDetail(id) {
+  const r = DATA.find(x => x._id === id);
+  if (!r) return;
+  selectedId = id;
+  document.getElementById('dEmpresa').textContent = r.empresa || '—';
+  document.getElementById('dPersona').textContent = r.persona || '';
+  document.getElementById('dCargo').textContent = r.cargo || '';
+  
+  const emailEl = document.getElementById('dEmail');
+  if (r.email) {
+    const emails = r.email.split('/').map(e => e.trim()).filter(Boolean);
+    emailEl.innerHTML = emails.map(e => 
+      `<a href="mailto:${esc(e)}">${esc(e)}</a>`
+    ).join('<br>') + `<button class="copy-btn" onclick="copyText('${esc(r.email)}')">copiar</button>`;
+  } else emailEl.textContent = '—';
+  
+  const telEl = document.getElementById('dTelefono');
+  if (r.telefono) {
+    telEl.innerHTML = `${esc(r.telefono)} <button class="copy-btn" onclick="copyText('${esc(r.telefono)}')">copiar</button>`;
+  } else telEl.textContent = '—';
+  
+  document.getElementById('dContacto').textContent = r.ultimo_contacto || '—';
+  document.getElementById('dPais').textContent = r.pais || '—';
+  document.getElementById('dFuente').textContent = r.fuente || '—';
+  document.getElementById('dEstado').textContent = r.estado || '—';
+  
+  const notasSec = document.getElementById('dNotasSection');
+  const notasEl = document.getElementById('dNotas');
+  if (r.notas) {
+    notasSec.style.display = 'block';
+    notasEl.textContent = r.notas;
+  } else {
+    notasSec.style.display = 'none';
+  }
+  
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  selectedId = null;
+}
+
+function copyText(t) {
+  navigator.clipboard.writeText(t).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = t; document.body.appendChild(el); el.select(); document.execCommand('copy'); el.remove();
+  });
+}
+
+function setFilter(type, val, btn) {
+  // Handle "has" filters as toggles
+  if (type === 'has') {
+    if (currentFilter.has === val) {
+      currentFilter.has = null;
+      btn.classList.remove('active');
+    } else {
+      document.querySelectorAll('[data-filter="has"]').forEach(b => b.classList.remove('active'));
+      currentFilter.has = val;
+      btn.classList.add('active');
+    }
+  } else {
+    document.querySelectorAll('[data-filter="fuente"]').forEach(b => b.classList.remove('active'));
+    currentFilter.fuente = val;
+    btn.classList.add('active');
+  }
+  applyFilters();
+}
+
+function onSearch() { applyFilters(); }
+
+function sortBy(col) {
+  if (currentSort.col === col) currentSort.asc = !currentSort.asc;
+  else { currentSort.col = col; currentSort.asc = true; }
+  applyFilters();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('tableView').style.display = v === 'table' ? 'flex' : 'none';
+  document.getElementById('tableView').style.flexDirection = 'column';
+  document.getElementById('cardsView').style.display = v === 'cards' ? 'block' : 'none';
+  document.getElementById('btnTable').classList.toggle('active', v === 'table');
+  document.getElementById('btnCards').classList.toggle('active', v === 'cards');
+  render();
+}
+
+function exportCSV() {
+  const cols = ['empresa','persona','cargo','email','telefono','ultimo_contacto','fuente','pais','estado','notas'];
+  const header = cols.join(',');
+  const rows = filtered.map(r => cols.map(c => `"${(r[c]||'').replace(/"/g,'""')}"`).join(','));
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'navieras_crm.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') closeDetail();
+});
+
+// Init
+applyFilters();
+</script>
+</body>
+</html>
