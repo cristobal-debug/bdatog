@@ -307,6 +307,28 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
   font-family:'DM Sans',sans-serif;flex-shrink:0;transition:all 0.15s;
 }
 .fchip.active{background:rgba(77,124,254,0.15);border-color:var(--accent);color:var(--accent);}
+
+/* IMPORT */
+.btn-import{background:var(--green-bg);border:1px solid rgba(46,204,138,0.3);color:var(--green);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;
+  white-space:nowrap;flex-shrink:0;font-weight:500;}
+.btn-import:hover{background:rgba(46,204,138,0.18);}
+.import-drop{border:2px dashed var(--border2);border-radius:12px;padding:2rem;text-align:center;
+  cursor:pointer;transition:all 0.2s;margin-bottom:1rem;}
+.import-drop:hover,.import-drop.drag{border-color:var(--accent);background:var(--blue-bg);}
+.import-drop-icon{font-size:32px;margin-bottom:8px;}
+.import-drop-text{font-size:14px;color:var(--text2);}
+.import-drop-sub{font-size:12px;color:var(--text3);margin-top:4px;}
+.col-map-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.col-map-row{display:flex;flex-direction:column;gap:4px;}
+.col-map-label{font-size:11px;color:var(--text3);}
+.col-map-select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:6px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;}
+.import-preview{background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:12px;
+  color:var(--text2);margin-bottom:1rem;border:1px solid var(--border);}
+.import-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:.5rem;display:none;}
+.import-progress-bar{height:100%;background:var(--green);border-radius:2px;transition:width 0.3s;}
+.import-status{font-size:12px;color:var(--text2);text-align:center;}
 </style>
 </head>
 <body>
@@ -400,6 +422,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
             <input type="text" id="searchInput" placeholder="Buscar empresa, email, teléfono… (Ctrl+K)" oninput="applyFilters()">
           </div>
           <button class="btn-add" onclick="openModal()">＋ <span>Nuevo contacto</span></button>
+          <button class="btn-import" onclick="openImport()">↑ <span>Importar Excel</span></button>
           <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
           <button class="btn-sec" onclick="loadContacts()">↻</button>
           <span class="results-label" id="resultsLabel">cargando…</span>
@@ -563,6 +586,44 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
     <div class="modal-footer">
       <button class="btn-sec" onclick="closePassModal()">Cancelar</button>
       <button class="btn-primary" onclick="savePassword()" style="width:auto;padding:8px 24px;">Cambiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal" style="display:none;" onclick="if(event.target===this)closeImport()">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-header">
+      <div class="modal-title">Importar contactos desde Excel</div>
+      <button class="modal-close" onclick="closeImport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- STEP 1: drop file -->
+      <div id="importStep1">
+        <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()">
+          <div class="import-drop-icon">📂</div>
+          <div class="import-drop-text">Arrastra tu Excel aquí o haz clic para seleccionar</div>
+          <div class="import-drop-sub">.xlsx, .xls, .csv — cualquier formato</div>
+        </div>
+        <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(this.files[0])">
+      </div>
+      <!-- STEP 2: map columns -->
+      <div id="importStep2" style="display:none;">
+        <div class="import-preview" id="importPreview"></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:500;">Mapea las columnas de tu archivo con los campos del CRM:</div>
+        <div class="col-map-grid" id="colMapGrid"></div>
+      </div>
+      <!-- STEP 3: progress -->
+      <div id="importStep3" style="display:none;">
+        <div class="import-progress" id="importProgress" style="display:block;">
+          <div class="import-progress-bar" id="importProgressBar" style="width:0%"></div>
+        </div>
+        <div class="import-status" id="importStatus">Preparando importación…</div>
+      </div>
+    </div>
+    <div class="modal-footer" id="importFooter">
+      <button class="btn-sec" onclick="closeImport()">Cancelar</button>
+      <button class="btn-primary" id="importBtn" onclick="runImport()" style="width:auto;padding:8px 24px;display:none;">Importar contactos</button>
     </div>
   </div>
 </div>
@@ -996,6 +1057,159 @@ function toast(msg, type='') {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
+
+// ===== IMPORT =====
+let importRows = [];
+let importHeaders = [];
+
+const CRM_FIELDS = [
+  { key:'empresa',          label:'Empresa' },
+  { key:'persona',          label:'Persona' },
+  { key:'cargo',            label:'Cargo' },
+  { key:'email',            label:'Email' },
+  { key:'telefono',         label:'Teléfono' },
+  { key:'ultimo_contacto',  label:'Último contacto' },
+  { key:'fuente',           label:'Fuente' },
+  { key:'pais',             label:'País' },
+  { key:'estado',           label:'Estado' },
+  { key:'notas',            label:'Notas' },
+];
+
+// Auto-map heuristics
+const AUTO_MAP = {
+  empresa:['empresa','company','compañia','compania','nombre empresa','razon social','razón social'],
+  persona:['persona','contacto','nombre','contact','name','person','representante'],
+  cargo:['cargo','puesto','position','title','titulo','role'],
+  email:['email','correo','mail','e-mail','correo electronico','correo electrónico'],
+  telefono:['telefono','teléfono','tlf','phone','tel','movil','móvil','celular'],
+  ultimo_contacto:['ultimo contacto','último contacto','fecha','date','last contact','fecha contacto'],
+  fuente:['fuente','source','origen','procedencia'],
+  pais:['pais','país','country','nacion','nación'],
+  estado:['estado','status','situacion','situación'],
+  notas:['notas','notes','comentarios','observaciones','nota'],
+};
+
+function openImport() {
+  importRows = []; importHeaders = [];
+  document.getElementById('importStep1').style.display = 'block';
+  document.getElementById('importStep2').style.display = 'none';
+  document.getElementById('importStep3').style.display = 'none';
+  document.getElementById('importBtn').style.display = 'none';
+  document.getElementById('importFile').value = '';
+  document.getElementById('importModal').style.display = 'flex';
+  const drop = document.getElementById('importDrop');
+  drop.addEventListener('dragover', e=>{e.preventDefault();drop.classList.add('drag');});
+  drop.addEventListener('dragleave', ()=>drop.classList.remove('drag'));
+  drop.addEventListener('drop', e=>{e.preventDefault();drop.classList.remove('drag');handleImportFile(e.dataTransfer.files[0]);});
+}
+
+function closeImport() {
+  document.getElementById('importModal').style.display = 'none';
+}
+
+function handleImportFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      if (raw.length < 2) { toast('El archivo está vacío','error'); return; }
+      importHeaders = raw[0].map(String);
+      importRows = raw.slice(1).filter(r => r.some(c => c !== ''));
+      showColMapper(file.name);
+    } catch(err) { toast('Error leyendo el archivo: '+err.message,'error'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showColMapper(filename) {
+  document.getElementById('importStep1').style.display = 'none';
+  document.getElementById('importStep2').style.display = 'block';
+  document.getElementById('importBtn').style.display = 'block';
+  document.getElementById('importPreview').innerHTML =
+    `<strong>${esc(filename)}</strong> — ${importRows.length} filas detectadas · ${importHeaders.length} columnas`;
+
+  const grid = document.getElementById('colMapGrid');
+  grid.innerHTML = CRM_FIELDS.map(f => {
+    const autoIdx = autoDetect(f.key, importHeaders);
+    const opts = importHeaders.map((h,i) =>
+      `<option value="${i}" ${autoIdx===i?'selected':''}>${esc(h)}</option>`
+    ).join('');
+    return `
+      <div class="col-map-row">
+        <div class="col-map-label">${f.label}</div>
+        <select class="col-map-select" id="map_${f.key}">
+          <option value="">— ignorar —</option>
+          ${opts}
+        </select>
+      </div>`;
+  }).join('');
+}
+
+function autoDetect(field, headers) {
+  const synonyms = AUTO_MAP[field] || [];
+  for (let i=0; i<headers.length; i++) {
+    const h = headers[i].toLowerCase().trim();
+    if (synonyms.some(s => h.includes(s) || s.includes(h))) return i;
+  }
+  return -1;
+}
+
+async function runImport() {
+  document.getElementById('importStep2').style.display = 'none';
+  document.getElementById('importStep3').style.display = 'block';
+  document.getElementById('importBtn').style.display = 'none';
+
+  const mapping = {};
+  CRM_FIELDS.forEach(f => {
+    const val = document.getElementById('map_'+f.key)?.value;
+    if (val !== '') mapping[f.key] = parseInt(val);
+  });
+
+  const total = importRows.length;
+  let done = 0, errors = 0;
+  const BATCH = 5; // enviar de 5 en 5 para no saturar
+
+  const setProgress = (n) => {
+    const pct = Math.round((n/total)*100);
+    document.getElementById('importProgressBar').style.width = pct+'%';
+    document.getElementById('importStatus').textContent =
+      `Importando… ${n} de ${total} contactos`;
+  };
+
+  for (let i=0; i<importRows.length; i+=BATCH) {
+    const batch = importRows.slice(i, i+BATCH);
+    await Promise.all(batch.map(async row => {
+      const body = { action:'addContact', token: SESSION.token, creado_por: SESSION.username };
+      CRM_FIELDS.forEach(f => {
+        const idx = mapping[f.key];
+        body[f.key] = idx !== undefined ? String(row[idx]||'').trim() : '';
+      });
+      // Skip completely empty rows
+      if (!body.empresa && !body.email && !body.persona) { done++; return; }
+      try { await api(body); } catch(e) { errors++; }
+      done++;
+      setProgress(done);
+    }));
+    setProgress(done);
+  }
+
+  document.getElementById('importStatus').textContent =
+    errors > 0
+      ? `✓ Importación completada — ${done-errors} ok, ${errors} errores`
+      : `✓ ${done} contactos importados correctamente`;
+  document.getElementById('importProgressBar').style.background = errors>0 ? 'var(--amber)' : 'var(--green)';
+
+  setTimeout(() => {
+    closeImport();
+    loadContacts();
+    toast(`${done-errors} contactos importados ✓`, 'success');
+  }, 1500);
+}
 </script>
+<!-- SheetJS for Excel parsing -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </body>
 </html>
