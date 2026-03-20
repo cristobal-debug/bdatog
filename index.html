@@ -659,8 +659,8 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
 </div>
 
 <!-- ===== AGENDA VIEW ===== -->
-<div id="agendaView">
-  <div class="agenda-toolbar">
+<div id="agendaView" style="background:var(--bg2);color:var(--text);">
+  <div class="agenda-toolbar" style="background:#171b25;border-bottom:1px solid rgba(255,255,255,0.1);">
     <div class="search-wrap" style="flex:1;min-width:160px;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="adSearchInput" placeholder="Buscar nombre, empresa, país…" oninput="adApplyFilters()">
@@ -682,7 +682,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
   </div>
 
   <!-- LIST VIEW -->
-  <div class="agenda-body" id="adListView">
+  <div class="agenda-body" id="adListView" style="background:#0f1117;">
     <!-- LEFT: alphabetical list -->
     <div class="agenda-list" id="adList">
       <div style="padding:2rem;text-align:center;color:var(--text3);font-size:13px;">
