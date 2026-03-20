@@ -1041,10 +1041,21 @@ function showTab(tab) {
 
 // ===== API =====
 async function api(body) {
+  // Apps Script redirects POST to GET — use GET with params for read actions, POST for writes
+  const readActions = ['getContacts','getAgencias','getAgenda','getUsers','ping'];
+  if (readActions.includes(body.action)) {
+    const params = new URLSearchParams({ action: body.action, token: body.token||'' });
+    const res = await fetch(API_URL + '?' + params.toString(), {
+      method: 'GET', redirect: 'follow'
+    });
+    return res.json();
+  }
+  // For write actions use POST with redirect follow
   const res = await fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { 'Content-Type': 'text/plain' }  // Apps Script requires text/plain for CORS
+    headers: { 'Content-Type': 'text/plain' },
+    redirect: 'follow'
   });
   return res.json();
 }
