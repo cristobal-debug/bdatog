@@ -821,6 +821,13 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
     <button class="pchip prod" data-pf="prod" data-pv="lsmgo" onclick="setProvFilter('prod','lsmgo',this)">LSMGO</button>
     <button class="pchip prod" data-pf="prod" data-pv="hsfo" onclick="setProvFilter('prod','hsfo',this)">HSFO</button>
     <button class="pchip prod" data-pf="prod" data-pv="ifo380" onclick="setProvFilter('prod','ifo380',this)">IFO380</button>
+    <span class="prov-filter-label" style="margin-left:12px;">Puerto:</span>
+    <select id="provPuertoSelect" onchange="setProvPuerto(this.value)"
+      style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 12px;
+             color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+             max-width:220px;">
+      <option value="all">⚓ Todos los puertos</option>
+    </select>
   </div>
   <div class="prov-body" id="provBody">
     <div style="text-align:center;padding:3rem;color:var(--text3);"><div class="spinner"></div><br>Cargando proveedores…</div>
@@ -2155,6 +2162,7 @@ let PROV_DATA = [];
 let provFiltered = [];
 let provFilterPais = 'all';
 let provFilterProd = 'all';
+let provFilterPuerto = 'all';
 let editingPortId = null;
 let editingPortProveedor = null;
 let editingPortPais = null;
@@ -2188,7 +2196,10 @@ function setProvFilter(type, val, btn) {
   if (type === 'pais') {
     document.querySelectorAll('[data-pf="pais"]').forEach(b=>b.classList.remove('active'));
     provFilterPais = val;
-  } else {
+    // Reset puerto filter when changing country
+    provFilterPuerto = 'all';
+    document.getElementById('provPuertoSelect').value = 'all';
+  } else if (type === 'prod') {
     document.querySelectorAll('[data-pf="prod"]').forEach(b=>b.classList.remove('active'));
     provFilterProd = val;
   }
@@ -2196,26 +2207,130 @@ function setProvFilter(type, val, btn) {
   provApplyFilters();
 }
 
+function setProvPuerto(val) {
+  provFilterPuerto = val;
+  // Reset pais and prod filters when selecting a specific port
+  if (val !== 'all') {
+    provFilterPais = 'all';
+    provFilterProd = 'all';
+    document.querySelectorAll('[data-pf="pais"]').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('[data-pf="prod"]').forEach(b=>b.classList.remove('active'));
+    document.querySelector('[data-pf="pais"][data-pv="all"]').classList.add('active');
+    document.querySelector('[data-pf="prod"][data-pv="all"]').classList.add('active');
+  }
+  provApplyFilters();
+}
+
+function updatePuertoSelect() {
+  const select = document.getElementById('provPuertoSelect');
+  const current = select.value;
+  // Get ports filtered by current pais
+  const ports = [...new Set(
+    PROV_DATA
+      .filter(r => provFilterPais === 'all' || r.pais === provFilterPais)
+      .map(r => r.puerto)
+      .filter(Boolean)
+  )].sort((a,b) => a.localeCompare(b));
+
+  select.innerHTML = '<option value="all">⚓ Todos los puertos</option>' +
+    ports.map(p => `<option value="${esc(p)}" ${p===current?'selected':''}>${esc(p)}</option>`).join('');
+}
+
 function provApplyFilters() {
+  updatePuertoSelect();
   const q = document.getElementById('provSearch').value.toLowerCase().trim();
   provFiltered = PROV_DATA.filter(r => {
     if (provFilterPais !== 'all' && r.pais !== provFilterPais) return false;
     if (provFilterProd !== 'all' && !r[provFilterProd]) return false;
+    if (provFilterPuerto !== 'all' && r.puerto !== provFilterPuerto) return false;
     if (q) {
       const hay = [r.proveedor,r.pais,r.puerto,r.vlsfo,r.mgo,r.lsmgo,r.hsfo,r.notas].join(' ').toLowerCase();
       if (!q.split(' ').every(t=>hay.includes(t))) return false;
     }
     return true;
   });
-  document.getElementById('provResultsLabel').textContent =
-    `${provFiltered.length} puerto${provFiltered.length!==1?'s':''}`;
+  const label = provFilterPuerto !== 'all'
+    ? `${provFiltered.length} proveedor${provFiltered.length!==1?'es':''} en ${provFilterPuerto}`
+    : `${provFiltered.length} puerto${provFiltered.length!==1?'s':''}`;
+  document.getElementById('provResultsLabel').textContent = label;
   renderProveedores();
 }
 
 function renderProveedores() {
   const body = document.getElementById('provBody');
   if (!provFiltered.length) {
-    body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3);">Sin resultados</div>';
+    body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3);">Sin resultados para esta búsqueda</div>';
+    return;
+  }
+
+  // PUERTO MODE: when a specific port is selected, show a summary card
+  if (provFilterPuerto !== 'all') {
+    const puerto = provFilterPuerto;
+    const pais = provFiltered[0]?.pais || '';
+    const flag = PAIS_FLAGS[pais] || '🌎';
+    const paisLabel = PAIS_LABELS[pais] || pais;
+
+    // Collect all products available in this port across all suppliers
+    const allProds = new Set();
+    provFiltered.forEach(r => {
+      if (r.vlsfo) allProds.add('VLSFO');
+      if (r.mgo)   allProds.add('MGO');
+      if (r.lsmgo) allProds.add('LSMGO');
+      if (r.hsfo)  allProds.add('HSFO');
+      if (r.ifo380) allProds.add('IFO380');
+      if (r.ulsd)  allProds.add('ULSD');
+    });
+
+    const supplierCards = provFiltered.map(r => {
+      const prods = [];
+      if (r.vlsfo) prods.push(`<span class="prod-badge pb-vlsfo">VLSFO</span>`);
+      if (r.mgo)   prods.push(`<span class="prod-badge pb-mgo">MGO</span>`);
+      if (r.lsmgo) prods.push(`<span class="prod-badge pb-lsmgo">LSMGO</span>`);
+      if (r.hsfo)  prods.push(`<span class="prod-badge pb-hsfo">HSFO</span>`);
+      if (r.ifo380) prods.push(`<span class="prod-badge pb-ifo">IFO380</span>`);
+
+      const entrega = [];
+      if (r.barcaza) entrega.push(`<div style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--text2);">⛵ <span>${esc(r.barcaza)}</span></div>`);
+      if (r.camion)  entrega.push(`<div style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--text2);">🚛 <span>${esc(r.camion)}</span></div>`);
+      if (r.pipe)    entrega.push(`<div style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--text2);">🔧 <span>${esc(r.pipe)}</span></div>`);
+
+      return `
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .15s;" onclick="openPortModal('${esc(r.id)}')" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="padding:.875rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);">${esc(r.proveedor)}</div>
+              ${r.nombre_barcaza ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">🚢 ${esc(r.nombre_barcaza)}</div>` : ''}
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">${prods.join('')}</div>
+          </div>
+          <div style="padding:.75rem 1rem;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px;">Entrega</div>
+              ${entrega.length ? entrega.join('') : '<span style="font-size:12px;color:var(--text3);">—</span>'}
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px;">Crédito</div>
+              <div style="font-size:13px;color:${r.credit_terms?'var(--green)':'var(--text3)'};">${r.credit_terms ? esc(r.credit_terms) : '—'}</div>
+            </div>
+            ${r.calidades ? `<div style="grid-column:1/-1;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px;">Calidades</div><div style="font-size:12px;color:var(--text2);">${esc(r.calidades)}</div></div>` : ''}
+            ${r.notas ? `<div style="grid-column:1/-1;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px;">Notas</div><div style="font-size:12px;color:var(--text2);line-height:1.5;">${esc(r.notas)}</div></div>` : ''}
+          </div>
+          <div style="padding:.5rem 1rem;background:var(--bg3);text-align:right;font-size:11px;color:var(--text3);">clic para editar ✏️</div>
+        </div>`;
+    }).join('');
+
+    body.innerHTML = `
+      <div style="margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;flex-wrap:wrap;">
+          <div style="font-size:26px;font-weight:700;color:var(--text);">⚓ ${esc(puerto)}</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-size:12px;color:var(--text2);">${flag} ${paisLabel}</div>
+          <div style="background:var(--blue-bg);border:1px solid rgba(77,124,254,.3);border-radius:8px;padding:4px 12px;font-size:12px;color:var(--accent);">${provFiltered.length} proveedor${provFiltered.length!==1?'es':''}</div>
+          <div style="background:var(--green-bg);border:1px solid rgba(46,204,138,.3);border-radius:8px;padding:4px 12px;font-size:12px;color:var(--green);">${[...allProds].join(' · ')}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;">
+          ${supplierCards}
+        </div>
+      </div>`;
     return;
   }
 
