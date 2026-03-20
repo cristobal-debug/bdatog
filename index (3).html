@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NavieraCRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--bg2:#171b25;--bg3:#1e2333;--bg4:#252b3d;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8eaf0;--text2:#8b92a8;--text3:#545c75;
+  --accent:#4d7cfe;--accent2:#2d5ce8;
+  --green:#2ecc8a;--green-bg:rgba(46,204,138,0.1);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);
+  --red:#ff5c5c;--red-bg:rgba(255,92,92,0.12);
+  --purple:#a855f7;--purple-bg:rgba(168,85,247,0.1);
+  --sidebar-w:220px;
+  --header-h:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+
+/* ===== LOGIN ===== */
+#loginScreen{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:1rem;}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:380px;}
+.login-logo{text-align:center;margin-bottom:2rem;}
+.login-logo .icon{font-size:40px;margin-bottom:8px;}
+.login-logo h1{font-size:22px;font-weight:600;letter-spacing:-0.02em;}
+.login-logo p{font-size:13px;color:var(--text3);margin-top:4px;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;}
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
+  outline:none;transition:border 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{border-color:var(--accent);}
+.form-group textarea{resize:vertical;}
+.btn-primary{width:100%;background:var(--accent);border:none;border-radius:8px;padding:11px;
+  color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:background 0.2s;margin-top:0.5rem;}
+.btn-primary:hover{background:var(--accent2);}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.login-error{background:var(--red-bg);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:1rem;display:none;}
+
+#appScreen{display:none;flex-direction:column;width:100%;height:100%;overflow:hidden;}
+
+/* HEADER — full width */
+.header{
+  width:100%;height:var(--header-h);flex-shrink:0;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;gap:12px;
+}
+.logo{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.02em;white-space:nowrap;}
+.nav-tabs{display:flex;gap:2px;flex:1;justify-content:center;}
+.nav-tab{background:none;border:none;color:var(--text3);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.nav-tab:hover{background:var(--bg3);color:var(--text2);}
+.nav-tab.active{background:var(--bg3);color:var(--text);}
+.nav-tab.admin-tab{color:var(--amber);}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 11px 4px 4px;font-size:13px;white-space:nowrap;}
+.user-avatar{width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.user-name{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.logout-btn:hover{color:var(--text);border-color:var(--border2);}
+
+/* ===== BODY LAYOUT ===== */
+/* contacts view = sidebar + main, full remaining height */
+#contactsView{
+  display:none;
+  flex:1;
+  overflow:hidden;
+  width:100%;
+}
+#contactsView.active{display:flex;}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+  overflow-y:auto;padding:.75rem;
+  height:100%;
+}
+.sidebar-section{margin-bottom:1.25rem;}
+.sidebar-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;padding-left:4px;}
+.filter-btn{
+  width:100%;text-align:left;padding:6px 9px;border-radius:6px;border:none;background:none;
+  color:var(--text2);font-size:12.5px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+}
+.filter-btn:hover{background:var(--bg3);color:var(--text);}
+.filter-btn.active{background:rgba(77,124,254,0.12);color:var(--accent);font-weight:500;}
+.fc{font-size:11px;background:var(--bg4);border-radius:10px;padding:1px 6px;font-family:'DM Mono',monospace;flex-shrink:0;}
+.filter-btn.active .fc{background:var(--accent);color:white;}
+
+/* MAIN AREA — takes all remaining width */
+.main-area{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  height:100%;
+}
+
+/* TOOLBAR */
+.toolbar{
+  padding:.75rem 1.25rem;border-bottom:1px solid var(--border);
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0;
+}
+.search-wrap{position:relative;flex:1;min-width:160px;}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text3);}
+#searchInput{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:8px 12px 8px 34px;color:var(--text);font-size:13px;
+  font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;
+}
+#searchInput:focus{border-color:var(--accent);}
+#searchInput::placeholder{color:var(--text3);}
+.btn-add{
+  background:var(--accent);border:none;color:white;padding:8px 14px;border-radius:8px;
+  cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;
+  white-space:nowrap;display:flex;align-items:center;gap:5px;flex-shrink:0;
+}
+.btn-add:hover{background:var(--accent2);}
+.btn-sec{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;
+  font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;
+}
+.btn-sec:hover{color:var(--text);border-color:var(--border2);}
+.results-label{font-size:12px;color:var(--text3);white-space:nowrap;}
+
+/* TABLE + DETAIL side by side */
+.content-area{
+  display:flex;flex:1;overflow:hidden;min-height:0;
+}
+
+/* TABLE */
+.table-container{flex:1;min-width:0;overflow:auto;padding:0 1.25rem 1.25rem;}
+table{width:100%;border-collapse:separate;border-spacing:0 3px;margin-top:.875rem;}
+thead th{
+  text-align:left;font-size:11px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:0.06em;
+  padding:0 12px 8px;position:sticky;top:0;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  cursor:pointer;white-space:nowrap;
+}
+thead th:hover{color:var(--text2);}
+tbody tr{background:var(--bg2);cursor:pointer;transition:background 0.1s;}
+tbody tr:hover{background:var(--bg3);}
+tbody td{
+  padding:10px 12px;font-size:13px;color:var(--text);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+tbody td:first-child{border-left:1px solid var(--border);border-radius:8px 0 0 8px;}
+tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px 0;}
+
+/* BADGES */
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap;}
+.b-directo{background:var(--green-bg);color:var(--green);}
+.b-linkedin{background:rgba(77,124,254,0.12);color:var(--accent);}
+.b-campana{background:var(--amber-bg);color:var(--amber);}
+.b-intl{background:var(--purple-bg);color:var(--purple);}
+.b-pendiente{background:var(--red-bg);color:var(--red);}
+.b-crm{background:var(--bg4);color:var(--text2);}
+
+/* LOADING */
+.loading-row td{text-align:center;padding:3rem;color:var(--text3);}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--bg4);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* DETAIL PANEL */
+.detail-panel{
+  width:0;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);
+  overflow:hidden;transition:width 0.25s ease;
+}
+.detail-panel.open{width:340px;}
+.detail-scroll{height:100%;overflow-y:auto;}
+.detail-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.d-empresa{font-size:16px;font-weight:600;line-height:1.3;}
+.d-persona{font-size:13px;color:var(--text2);margin-top:3px;}
+.d-cargo{font-size:12px;color:var(--text3);}
+.detail-actions{display:flex;gap:6px;flex-shrink:0;}
+.icon-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.icon-btn:hover{background:var(--bg4);color:var(--text);}
+.icon-btn.red:hover{background:var(--red-bg);color:var(--red);border-color:rgba(255,92,92,0.3);}
+.detail-body{padding:1.1rem 1.25rem;}
+.d-section{margin-bottom:1.1rem;}
+.d-section-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.d-field{margin-bottom:7px;}
+.d-label{font-size:11px;color:var(--text3);margin-bottom:2px;}
+.d-val{font-size:13px;color:var(--text);word-break:break-word;line-height:1.5;}
+.d-val a{color:var(--accent);text-decoration:none;}
+.d-val a:hover{text-decoration:underline;}
+.copy-btn{font-size:11px;background:var(--bg3);border:1px solid var(--border);color:var(--text3);padding:2px 7px;border-radius:5px;cursor:pointer;margin-left:4px;vertical-align:middle;font-family:'DM Sans',sans-serif;}
+.copy-btn:hover{background:var(--bg4);color:var(--text);}
+.notes-box{background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text2);line-height:1.6;border:1px solid var(--border);}
+
+/* ===== USERS TAB ===== */
+#usersView{display:none;flex:1;overflow:auto;padding:1.5rem;width:100%;}
+#usersView.active{display:block;}
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.user-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;}
+.uc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.uc-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;flex-shrink:0;}
+.uc-avatar.admin{background:var(--amber-bg);color:var(--amber);}
+.uc-avatar.user{background:var(--green-bg);color:var(--green);}
+.uc-name{font-size:14px;font-weight:500;}
+.uc-role{font-size:12px;color:var(--text3);}
+.uc-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.uc-btn{font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;}
+.uc-btn:hover{background:var(--bg4);color:var(--text);}
+.uc-inactive{opacity:0.45;}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px);}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);}
+.modal-title{font-size:16px;font-weight:600;}
+.modal-close{background:var(--bg3);border:none;color:var(--text2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--bg4);color:var(--text);}
+.modal-body{padding:1.5rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid .full{grid-column:1/-1;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:1rem 1.5rem;border-top:1px solid var(--border);}
+.btn-danger{background:var(--red-bg);border:1px solid rgba(255,92,92,0.3);color:var(--red);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;}
+.btn-danger:hover{background:rgba(255,92,92,0.2);}
+.modal-error{background:var(--red-bg);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem;display:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);z-index:999;
+  transform:translateY(16px);opacity:0;transition:all 0.22s;max-width:300px;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:rgba(46,204,138,0.4);color:var(--green);}
+.toast.error{border-color:rgba(255,92,92,0.4);color:var(--red);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet landscape — shrink sidebar */
+@media(max-width:1024px){
+  :root{--sidebar-w:180px;}
+  .detail-panel.open{width:300px;}
+  .user-name{max-width:70px;}
+}
+
+/* Tablet portrait — hide sidebar, show filter bar */
+@media(max-width:768px){
+  :root{--sidebar-w:0px;}
+  .sidebar{display:none;}
+  .filter-bar-mobile{display:flex!important;}
+  .detail-panel.open{
+    position:fixed;top:var(--header-h);right:0;bottom:0;
+    width:100%!important;max-width:400px;z-index:40;
+    border-left:1px solid var(--border2);
+  }
+  .table-container{padding:0 .75rem .75rem;}
+  .toolbar{padding:.6rem .75rem;gap:6px;}
+  .logo-text{display:none;}
+  .nav-tab{padding:6px 10px;font-size:12px;}
+  .user-name{display:none;}
+  .results-label{display:none;}
+  /* table: hide less critical cols */
+  thead th:nth-child(3),tbody td:nth-child(3),  /* email en mobile lo mantenemos */
+  thead th:nth-child(5),tbody td:nth-child(5),  /* contacto */
+  thead th:nth-child(7),tbody td:nth-child(7)   /* pais */
+  {display:none;}
+}
+
+/* Mobile */
+@media(max-width:480px){
+  .header{padding:0 .75rem;}
+  .btn-add span{display:none;}/* hide label, keep + */
+  thead th:nth-child(4),tbody td:nth-child(4)/* telefono */{display:none;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-grid .full{grid-column:1;}
+  .modal{border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%;max-height:85vh;}
+  .modal-overlay{align-items:flex-end;padding:0;}
+}
+
+/* Mobile filter bar (shown only on mobile) */
+.filter-bar-mobile{
+  display:none;
+  overflow-x:auto;padding:.5rem .75rem;gap:6px;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+  scrollbar-width:none;
+}
+.filter-bar-mobile::-webkit-scrollbar{display:none;}
+.fchip{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;flex-shrink:0;transition:all 0.15s;
+}
+.fchip.active{background:rgba(77,124,254,0.15);border-color:var(--accent);color:var(--accent);}
+
+/* IMPORT */
+.btn-import{background:var(--green-bg);border:1px solid rgba(46,204,138,0.3);color:var(--green);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;
+  white-space:nowrap;flex-shrink:0;font-weight:500;}
+.btn-import:hover{background:rgba(46,204,138,0.18);}
+.import-drop{border:2px dashed var(--border2);border-radius:12px;padding:2rem;text-align:center;
+  cursor:pointer;transition:all 0.2s;margin-bottom:1rem;}
+.import-drop:hover,.import-drop.drag{border-color:var(--accent);background:var(--blue-bg);}
+.import-drop-icon{font-size:32px;margin-bottom:8px;}
+.import-drop-text{font-size:14px;color:var(--text2);}
+.import-drop-sub{font-size:12px;color:var(--text3);margin-top:4px;}
+.col-map-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.col-map-row{display:flex;flex-direction:column;gap:4px;}
+.col-map-label{font-size:11px;color:var(--text3);}
+.col-map-select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:6px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;}
+.import-preview{background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:12px;
+  color:var(--text2);margin-bottom:1rem;border:1px solid var(--border);}
+.import-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:.5rem;display:none;}
+.import-progress-bar{height:100%;background:var(--green);border-radius:2px;transition:width 0.3s;}
+.import-status{font-size:12px;color:var(--text2);text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">⚓</div>
+      <h1>NavieraCRM</h1>
+      <p>Gestión de contactos navieros</p>
+    </div>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="tu usuario" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appScreen">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">⚓</div>
+      <span class="logo-text">NavieraCRM</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tabContacts" onclick="showTab('contacts')">Contactos</button>
+      <button class="nav-tab" id="tabAgencias" onclick="showTab('agencias')">Agencias</button>
+      <button class="nav-tab admin-tab" id="tabUsers" onclick="showTab('users')" style="display:none">Usuarios</button>
+    </div>
+    <div class="header-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-name" id="userLabel">—</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- CONTACTS TAB -->
+  <div id="contactsView" style="display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0;">
+
+    <!-- mobile filter chips (hidden on desktop) -->
+    <div class="filter-bar-mobile" id="mobileFilterBar">
+      <button class="fchip active" data-f="fuente" data-v="all" onclick="setFilter('fuente','all',this)">Todos</button>
+      <button class="fchip" data-f="fuente" data-v="Contacto directo" onclick="setFilter('fuente','Contacto directo',this)">Directo</button>
+      <button class="fchip" data-f="fuente" data-v="CRM" onclick="setFilter('fuente','CRM',this)">CRM</button>
+      <button class="fchip" data-f="fuente" data-v="Campaña España" onclick="setFilter('fuente','Campaña España',this)">España</button>
+      <button class="fchip" data-f="fuente" data-v="Campaña masiva" onclick="setFilter('fuente','Campaña masiva',this)">Masiva</button>
+      <button class="fchip" data-f="fuente" data-v="Base internacional" onclick="setFilter('fuente','Base internacional',this)">Internacional</button>
+      <button class="fchip" data-f="fuente" data-v="Pendientes" onclick="setFilter('fuente','Pendientes',this)">Pendientes</button>
+      <button class="fchip" data-f="fuente" data-v="Linkedin" onclick="setFilter('fuente','Linkedin',this)">LinkedIn</button>
+    </div>
+
+    <!-- body: sidebar + main -->
+    <div style="display:flex;flex:1;overflow:hidden;min-height:0;">
+
+      <!-- SIDEBAR (desktop only) -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">Fuente</div>
+          <button class="filter-btn active" data-f="fuente" data-v="all" onclick="setFilter('fuente','all',this)">Todos <span class="fc" id="fc-all">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="Contacto directo" onclick="setFilter('fuente','Contacto directo',this)">Contacto directo <span class="fc" id="fc-cd">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="CRM" onclick="setFilter('fuente','CRM',this)">CRM / Seguimiento <span class="fc" id="fc-crm">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="Campaña España" onclick="setFilter('fuente','Campaña España',this)">Campaña España <span class="fc" id="fc-ce">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="Campaña masiva" onclick="setFilter('fuente','Campaña masiva',this)">Campaña masiva <span class="fc" id="fc-cm">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="Base internacional" onclick="setFilter('fuente','Base internacional',this)">Base internacional <span class="fc" id="fc-bi">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="Pendientes" onclick="setFilter('fuente','Pendientes',this)">Pendientes <span class="fc" id="fc-pe">0</span></button>
+          <button class="filter-btn" data-f="fuente" data-v="Linkedin" onclick="setFilter('fuente','Linkedin',this)">LinkedIn <span class="fc" id="fc-li">0</span></button>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Filtrar por</div>
+          <button class="filter-btn" data-f="has" data-v="email" onclick="setFilter('has','email',this)">✉ Con email</button>
+          <button class="filter-btn" data-f="has" data-v="telefono" onclick="setFilter('has','telefono',this)">📞 Con teléfono</button>
+          <button class="filter-btn" data-f="has" data-v="persona" onclick="setFilter('has','persona',this)">👤 Con contacto</button>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main-area">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="searchInput" placeholder="Buscar empresa, email, teléfono… (Ctrl+K)" oninput="applyFilters()">
+          </div>
+          <button class="btn-add" onclick="openModal()">＋ <span>Nuevo contacto</span></button>
+          <button class="btn-import" onclick="openImport()">↑ <span>Importar Excel</span></button>
+          <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
+          <button class="btn-sec" onclick="loadContacts()">↻</button>
+          <span class="results-label" id="resultsLabel">cargando…</span>
+        </div>
+
+        <!-- table + detail side by side -->
+        <div class="content-area">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th onclick="sortBy('empresa')">Empresa ↕</th>
+                  <th onclick="sortBy('persona')">Persona ↕</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th onclick="sortBy('ultimo_contacto')">Contacto ↕</th>
+                  <th>Fuente</th>
+                  <th>País</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr class="loading-row"><td colspan="7"><div class="spinner"></div> Cargando datos…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- DETAIL PANEL -->
+          <div class="detail-panel" id="detailPanel">
+            <div class="detail-scroll">
+              <div class="detail-header">
+                <div style="min-width:0;">
+                  <div class="d-empresa" id="dEmpresa">—</div>
+                  <div class="d-persona" id="dPersona"></div>
+                  <div class="d-cargo" id="dCargo"></div>
+                </div>
+                <div class="detail-actions">
+                  <button class="icon-btn" title="Editar" onclick="openModal(currentDetail)">✏️</button>
+                  <button class="icon-btn red" title="Eliminar" id="dDeleteBtn" onclick="deleteContact(currentDetail)">🗑</button>
+                  <button class="icon-btn" title="Cerrar" onclick="closeDetail()">✕</button>
+                </div>
+              </div>
+              <div class="detail-body">
+                <div class="d-section">
+                  <div class="d-section-title">Contacto</div>
+                  <div class="d-field"><div class="d-label">Email</div><div class="d-val" id="dEmail">—</div></div>
+                  <div class="d-field"><div class="d-label">Teléfono</div><div class="d-val" id="dTlf">—</div></div>
+                </div>
+                <div class="d-section">
+                  <div class="d-section-title">Información</div>
+                  <div class="d-field"><div class="d-label">Cargo</div><div class="d-val" id="dCargoDet">—</div></div>
+                  <div class="d-field"><div class="d-label">Último contacto</div><div class="d-val" id="dUlt">—</div></div>
+                  <div class="d-field"><div class="d-label">País</div><div class="d-val" id="dPais">—</div></div>
+                  <div class="d-field"><div class="d-label">Fuente</div><div class="d-val" id="dFuente">—</div></div>
+                  <div class="d-field"><div class="d-label">Estado</div><div class="d-val" id="dEstado">—</div></div>
+                </div>
+                <div class="d-section" id="dNotasSec">
+                  <div class="d-section-title">Notas</div>
+                  <div class="notes-box" id="dNotas"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /content-area -->
+      </div><!-- /main-area -->
+    </div><!-- /flex body -->
+  </div><!-- /contactsView -->
+
+  <!-- USERS TAB -->
+  <div id="usersView" style="display:none;flex:1;overflow:auto;padding:1.5rem;width:100%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:18px;font-weight:600;">Gestión de usuarios</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px;">Solo el administrador puede crear o modificar usuarios.</div>
+      </div>
+      <button class="btn-add" onclick="openUserModal()">＋ Nuevo usuario</button>
+    </div>
+    <div class="users-grid" id="usersGrid">
+      <div style="color:var(--text3);font-size:13px;">Cargando usuarios…</div>
+    </div>
+  </div>
+
+  <!-- AGENCIAS TAB -->
+  <div id="agenciasView" style="display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0;">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="agSearchInput" placeholder="Buscar agencia, puerto, servicio… (Ctrl+K)" oninput="agApplyFilters()">
+      </div>
+      <button class="btn-add" onclick="openAgModal()">＋ <span>Nueva agencia</span></button>
+      <button class="btn-sec" onclick="exportAgCSV()">↓ CSV</button>
+      <button class="btn-sec" onclick="loadAgencias()">↻</button>
+      <span class="results-label" id="agResultsLabel">cargando…</span>
+    </div>
+
+    <!-- filter chips row -->
+    <div style="display:flex;gap:6px;padding:.5rem 1.25rem;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;">
+      <button class="fchip active" data-ag="all" onclick="setAgFilter('all',this)">Todas</button>
+      <button class="fchip" data-ag="Agencia consignataria" onclick="setAgFilter('Agencia consignataria',this)">Consignataria</button>
+      <button class="fchip" data-ag="Agencia de carga" onclick="setAgFilter('Agencia de carga',this)">Carga</button>
+      <button class="fchip" data-ag="Transitaria" onclick="setAgFilter('Transitaria',this)">Transitaria</button>
+      <button class="fchip" data-ag="Bróker" onclick="setAgFilter('Bróker',this)">Bróker</button>
+      <button class="fchip" data-ag="Operador portuario" onclick="setAgFilter('Operador portuario',this)">Operador portuario</button>
+      <button class="fchip" data-ag="Otro" onclick="setAgFilter('Otro',this)">Otro</button>
+    </div>
+
+    <div class="content-area">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="agSortBy('nombre')">Agencia ↕</th>
+              <th onclick="agSortBy('tipo')">Tipo ↕</th>
+              <th>Contacto</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Puertos</th>
+              <th>Buques</th>
+            </tr>
+          </thead>
+          <tbody id="agTableBody">
+            <tr class="loading-row"><td colspan="7"><div class="spinner"></div> Cargando agencias…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AGENCY DETAIL PANEL -->
+      <div class="detail-panel" id="agDetailPanel">
+        <div class="detail-scroll">
+          <div class="detail-header">
+            <div style="min-width:0;">
+              <div class="d-empresa" id="agDNombre">—</div>
+              <div class="d-persona" id="agDTipo"></div>
+              <div class="d-cargo" id="agDPais"></div>
+            </div>
+            <div class="detail-actions">
+              <button class="icon-btn" title="Editar" onclick="openAgModal(currentAgDetail)">✏️</button>
+              <button class="icon-btn red" title="Eliminar" id="agDDeleteBtn" onclick="deleteAgencia(currentAgDetail)">🗑</button>
+              <button class="icon-btn" title="Cerrar" onclick="closeAgDetail()">✕</button>
+            </div>
+          </div>
+          <div class="detail-body">
+            <div class="d-section">
+              <div class="d-section-title">Contacto</div>
+              <div class="d-field"><div class="d-label">Persona</div><div class="d-val" id="agDPersona">—</div></div>
+              <div class="d-field"><div class="d-label">Cargo</div><div class="d-val" id="agDCargo">—</div></div>
+              <div class="d-field"><div class="d-label">Email</div><div class="d-val" id="agDEmail">—</div></div>
+              <div class="d-field"><div class="d-label">Teléfono</div><div class="d-val" id="agDTlf">—</div></div>
+              <div class="d-field"><div class="d-label">Web</div><div class="d-val" id="agDWeb">—</div></div>
+            </div>
+            <div class="d-section">
+              <div class="d-section-title">Operaciones</div>
+              <div class="d-field"><div class="d-label">Puertos</div><div class="d-val" id="agDPuertos">—</div></div>
+              <div class="d-field"><div class="d-label">Tipos de buque</div><div class="d-val" id="agDBuques">—</div></div>
+              <div class="d-field"><div class="d-label">Servicios</div><div class="d-val" id="agDServicios">—</div></div>
+            </div>
+            <div class="d-section">
+              <div class="d-section-title">Información</div>
+              <div class="d-field"><div class="d-label">País</div><div class="d-val" id="agDPaisD">—</div></div>
+              <div class="d-field"><div class="d-label">Estado</div><div class="d-val" id="agDEstado">—</div></div>
+              <div class="d-field"><div class="d-label">Último contacto</div><div class="d-val" id="agDUlt">—</div></div>
+            </div>
+            <div class="d-section" id="agDNotasSec">
+              <div class="d-section-title">Notas</div>
+              <div class="notes-box" id="agDNotas"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CONTACTO ===== -->
+<div class="modal-overlay" id="contactModal" style="display:none;" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Nuevo contacto</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="modalError"></div>
+      <div class="form-grid">
+        <div class="full form-group"><label>Empresa</label><input type="text" id="fEmpresa" placeholder="Nombre de la empresa"></div>
+        <div class="form-group"><label>Persona de contacto</label><input type="text" id="fPersona" placeholder="Nombre completo"></div>
+        <div class="form-group"><label>Cargo</label><input type="text" id="fCargo" placeholder="Cargo o puesto"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="fEmail" placeholder="correo@empresa.com"></div>
+        <div class="form-group"><label>Teléfono</label><input type="text" id="fTlf" placeholder="+34 600 000 000"></div>
+        <div class="form-group"><label>País</label><input type="text" id="fPais" placeholder="España"></div>
+        <div class="form-group"><label>Último contacto</label><input type="text" id="fUlt" placeholder="9 Febrero 2026"></div>
+        <div class="form-group"><label>Fuente</label>
+          <select id="fFuente" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+            <option value="Contacto directo">Contacto directo</option>
+            <option value="CRM">CRM / Seguimiento</option>
+            <option value="Campaña España">Campaña España</option>
+            <option value="Campaña masiva">Campaña masiva</option>
+            <option value="Base internacional">Base internacional</option>
+            <option value="Pendientes">Pendientes</option>
+            <option value="Linkedin">LinkedIn</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Estado</label><input type="text" id="fEstado" placeholder="ej: enviado, pendiente, rebotó…"></div>
+        <div class="full form-group"><label>Notas</label><textarea id="fNotas" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Notas adicionales…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" id="modalSaveBtn" onclick="saveContact()" style="width:auto;padding:8px 24px;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL USUARIO ===== -->
+<div class="modal-overlay" id="userModal" style="display:none;" onclick="if(event.target===this)closeUserModal()">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title" id="userModalTitle">Nuevo usuario</div>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="userModalError"></div>
+      <div class="form-group"><label>Usuario (login)</label><input type="text" id="uUsername" placeholder="ej: maria"></div>
+      <div class="form-group"><label>Nombre completo</label><input type="text" id="uNombre" placeholder="ej: María García"></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="uPass" placeholder="mínimo 6 caracteres"></div>
+      <div class="form-group"><label>Rol</label>
+        <select id="uRole" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+          <option value="user">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeUserModal()">Cancelar</button>
+      <button class="btn-primary" id="userSaveBtn" onclick="saveUser()" style="width:auto;padding:8px 24px;">Crear usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="passModal" style="display:none;" onclick="if(event.target===this)closePassModal()">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <div class="modal-title">Cambiar contraseña</div>
+      <button class="modal-close" onclick="closePassModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="passModalError"></div>
+      <div class="form-group"><label>Usuario: <span id="passUsername" style="color:var(--accent)"></span></label></div>
+      <div class="form-group"><label>Nueva contraseña</label><input type="password" id="newPass" placeholder="mínimo 6 caracteres"></div>
+      <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="confirmPass" placeholder="repite la contraseña"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closePassModal()">Cancelar</button>
+      <button class="btn-primary" onclick="savePassword()" style="width:auto;padding:8px 24px;">Cambiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL AGENCIA ===== -->
+<div class="modal-overlay" id="agModal" style="display:none;" onclick="if(event.target===this)closeAgModal()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <div class="modal-title" id="agModalTitle">Nueva agencia</div>
+      <button class="modal-close" onclick="closeAgModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="agModalError"></div>
+      <div class="form-grid">
+        <div class="full form-group"><label>Nombre de la agencia *</label><input type="text" id="agFNombre" placeholder="Ej: Boluda Shipping"></div>
+        <div class="form-group"><label>Tipo de agencia</label>
+          <select id="agFTipo" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+            <option value="">— seleccionar —</option>
+            <option>Agencia consignataria</option>
+            <option>Agencia de carga</option>
+            <option>Transitaria</option>
+            <option>Bróker</option>
+            <option>Operador portuario</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>País</label><input type="text" id="agFPais" placeholder="España"></div>
+        <div class="form-group"><label>Persona de contacto</label><input type="text" id="agFPersona" placeholder="Nombre completo"></div>
+        <div class="form-group"><label>Cargo</label><input type="text" id="agFCargo" placeholder="Cargo o puesto"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="agFEmail" placeholder="correo@agencia.com"></div>
+        <div class="form-group"><label>Teléfono</label><input type="text" id="agFTlf" placeholder="+34 600 000 000"></div>
+        <div class="form-group"><label>Sitio web</label><input type="text" id="agFWeb" placeholder="www.agencia.com"></div>
+        <div class="full form-group"><label>Puertos donde opera <span style="color:var(--text3);font-size:11px;">(separados por coma)</span></label><input type="text" id="agFPuertos" placeholder="Valencia, Barcelona, Bilbao, Rotterdam…"></div>
+        <div class="full form-group"><label>Tipos de buque que maneja <span style="color:var(--text3);font-size:11px;">(separados por coma)</span></label><input type="text" id="agFBuques" placeholder="Graneleros, Tanqueros, Portacontenedores…"></div>
+        <div class="full form-group"><label>Servicios que ofrece <span style="color:var(--text3);font-size:11px;">(separados por coma)</span></label><input type="text" id="agFServicios" placeholder="Consignación, Despacho aduanero, Estiba…"></div>
+        <div class="form-group"><label>Último contacto</label><input type="text" id="agFUlt" placeholder="20 Marzo 2026"></div>
+        <div class="form-group"><label>Estado</label><input type="text" id="agFEstado" placeholder="activo, pendiente, no interesado…"></div>
+        <div class="full form-group"><label>Notas</label><textarea id="agFNotas" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Observaciones adicionales…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeAgModal()">Cancelar</button>
+      <button class="btn-primary" id="agSaveBtn" onclick="saveAgencia()" style="width:auto;padding:8px 24px;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal" style="display:none;" onclick="if(event.target===this)closeImport()">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-header">
+      <div class="modal-title">Importar contactos desde Excel</div>
+      <button class="modal-close" onclick="closeImport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- STEP 1: drop file -->
+      <div id="importStep1">
+        <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()">
+          <div class="import-drop-icon">📂</div>
+          <div class="import-drop-text">Arrastra tu Excel aquí o haz clic para seleccionar</div>
+          <div class="import-drop-sub">.xlsx, .xls, .csv — cualquier formato</div>
+        </div>
+        <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(this.files[0])">
+      </div>
+      <!-- STEP 2: map columns -->
+      <div id="importStep2" style="display:none;">
+        <div class="import-preview" id="importPreview"></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:500;">Mapea las columnas de tu archivo con los campos del CRM:</div>
+        <div class="col-map-grid" id="colMapGrid"></div>
+      </div>
+      <!-- STEP 3: progress -->
+      <div id="importStep3" style="display:none;">
+        <div class="import-progress" id="importProgress" style="display:block;">
+          <div class="import-progress-bar" id="importProgressBar" style="width:0%"></div>
+        </div>
+        <div class="import-status" id="importStatus">Preparando importación…</div>
+      </div>
+    </div>
+    <div class="modal-footer" id="importFooter">
+      <button class="btn-sec" onclick="closeImport()">Cancelar</button>
+      <button class="btn-primary" id="importBtn" onclick="runImport()" style="width:auto;padding:8px 24px;display:none;">Importar contactos</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  CONFIGURACIÓN — PON AQUÍ TU URL DE APPS SCRIPT
+// ============================================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbx4HvITMfV5QI5WNdpfNbDQT1KVmYg44XS0FTRWxtbKZxjRxgr1Oo2-_Qfmx5u8kc2Z/exec';
+// ============================================================
+
+let SESSION = null;   // { token, username, role, nombre }
+let DATA    = [];     // todos los contactos
+let filtered= [];
+let sortState = { col: null, asc: true };
+let filterState = { fuente: 'all', has: null };
+let currentDetail = null;
+let editingId = null;
+let changingPassFor = null;
+
+// ===== AUTH =====
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!user || !pass) { showLoginErr('Rellena usuario y contraseña.'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  err.style.display = 'none';
+  try {
+    const res = await api({ action:'login', username:user, password:pass });
+    if (res.ok) {
+      SESSION = res;
+      sessionStorage.setItem('crm_session', JSON.stringify(res));
+      startApp();
+    } else {
+      showLoginErr(res.error || 'Error al iniciar sesión.');
+    }
+  } catch(e) {
+    showLoginErr('No se pudo conectar con el servidor. Verifica la URL de la API.');
+  }
+  btn.disabled = false; btn.textContent = 'Entrar';
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function doLogout() {
+  sessionStorage.removeItem('crm_session');
+  SESSION = null; DATA = []; filtered = [];
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
+
+function startApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  document.getElementById('contactsView').style.display = 'flex';
+  document.getElementById('userLabel').textContent = SESSION.nombre || SESSION.username;
+  document.getElementById('userAvatar').textContent = (SESSION.nombre||SESSION.username)[0].toUpperCase();
+  if (SESSION.role === 'admin') {
+    document.getElementById('tabUsers').style.display = 'block';
+    document.getElementById('dDeleteBtn').style.display = 'flex';
+  } else {
+    document.getElementById('dDeleteBtn').style.display = 'none';
+  }
+  showTab('contacts');
+  loadContacts();
+}
+
+// Auto-restore session
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('crm_session');
+  if (saved) {
+    SESSION = JSON.parse(saved);
+    startApp();
+  }
+  document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDetail();
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+    if (e.key === 'Escape') { closeDetail(); closeModal(); }
+  });
+});
+
+// ===== TABS =====
+function showTab(tab) {
+  document.getElementById('contactsView').style.display  = tab==='contacts'  ? 'flex'  : 'none';
+  document.getElementById('agenciasView').style.display  = tab==='agencias'  ? 'flex'  : 'none';
+  document.getElementById('usersView').style.display     = tab==='users'     ? 'block' : 'none';
+  document.getElementById('tabContacts').classList.toggle('active', tab==='contacts');
+  document.getElementById('tabAgencias').classList.toggle('active', tab==='agencias');
+  document.getElementById('tabUsers').classList.toggle('active',    tab==='users');
+  if (tab==='users')    loadUsers();
+  if (tab==='agencias') loadAgencias();
+}
+
+// ===== API =====
+async function api(body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'text/plain' }  // Apps Script requires text/plain for CORS
+  });
+  return res.json();
+}
+
+// ===== CONTACTS =====
+async function loadContacts() {
+  document.getElementById('tableBody').innerHTML =
+    '<tr class="loading-row"><td colspan="7"><div class="spinner"></div> Cargando…</td></tr>';
+  try {
+    const res = await api({ action:'getContacts', token: SESSION.token });
+    if (!res.ok) { toast(res.error, 'error'); return; }
+    DATA = res.data.map((r,i) => ({...r, _idx: i}));
+    updateCounts();
+    applyFilters();
+  } catch(e) {
+    document.getElementById('tableBody').innerHTML =
+      '<tr class="loading-row"><td colspan="7" style="color:var(--red)">Error de conexión</td></tr>';
+  }
+}
+
+function updateCounts() {
+  const fuentes = {
+    'all': DATA.length,
+    'Contacto directo': 0, 'CRM': 0, 'Campaña España': 0,
+    'Campaña masiva': 0, 'Base internacional': 0, 'Pendientes': 0, 'Linkedin': 0
+  };
+  DATA.forEach(r => {
+    const f = normFuente(r.fuente);
+    if (fuentes[f] !== undefined) fuentes[f]++;
+  });
+  document.getElementById('fc-all').textContent = fuentes['all'];
+  document.getElementById('fc-cd').textContent  = fuentes['Contacto directo'];
+  document.getElementById('fc-crm').textContent = fuentes['CRM'];
+  document.getElementById('fc-ce').textContent  = fuentes['Campaña España'];
+  document.getElementById('fc-cm').textContent  = fuentes['Campaña masiva'];
+  document.getElementById('fc-bi').textContent  = fuentes['Base internacional'];
+  document.getElementById('fc-pe').textContent  = fuentes['Pendientes'];
+  document.getElementById('fc-li').textContent  = fuentes['Linkedin'];
+}
+
+function normFuente(f) {
+  if (!f) return 'CRM';
+  const fl = f.toLowerCase();
+  if (fl.includes('directo')) return 'Contacto directo';
+  if (fl.includes('linkedin')) return 'Linkedin';
+  if (fl.includes('masiva')) return 'Campaña masiva';
+  if (fl.includes('espa')) return 'Campaña España';
+  if (fl.includes('internac')) return 'Base internacional';
+  if (fl.includes('pendient')) return 'Pendientes';
+  return 'CRM';
+}
+
+function badgeClass(f) {
+  const n = normFuente(f);
+  const m = {'Contacto directo':'b-directo','Linkedin':'b-linkedin','Campaña masiva':'b-campana',
+             'Campaña España':'b-campana','Base internacional':'b-intl','Pendientes':'b-pendiente','CRM':'b-crm'};
+  return m[n] || 'b-crm';
+}
+
+function setFilter(type, val, btn) {
+  if (type === 'has') {
+    if (filterState.has === val) { filterState.has = null; btn.classList.remove('active'); }
+    else { document.querySelectorAll('[data-f="has"]').forEach(b=>b.classList.remove('active')); filterState.has=val; btn.classList.add('active'); }
+  } else {
+    document.querySelectorAll('[data-f="fuente"]').forEach(b=>b.classList.remove('active'));
+    filterState.fuente = val; btn.classList.add('active');
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  filtered = DATA.filter(r => {
+    const fn = normFuente(r.fuente);
+    if (filterState.fuente !== 'all' && fn !== filterState.fuente) return false;
+    if (filterState.has === 'email' && !r.email?.includes('@')) return false;
+    if (filterState.has === 'telefono' && !r.telefono) return false;
+    if (filterState.has === 'persona' && !r.persona) return false;
+    if (q) {
+      const hay = [r.empresa,r.persona,r.email,r.telefono,r.notas,r.cargo,r.pais,r.estado].join(' ').toLowerCase();
+      if (!q.split(' ').every(t => hay.includes(t))) return false;
+    }
+    return true;
+  });
+  if (sortState.col) {
+    filtered.sort((a,b) => {
+      const av=(a[sortState.col]||'').toLowerCase(), bv=(b[sortState.col]||'').toLowerCase();
+      return sortState.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+  }
+  document.getElementById('resultsLabel').textContent = `${filtered.length} resultado${filtered.length!==1?'s':''}`;
+  renderTable();
+}
+
+function sortBy(col) {
+  sortState.asc = sortState.col===col ? !sortState.asc : true;
+  sortState.col = col;
+  applyFilters();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Sin resultados</td></tr>'; return;
+  }
+  tbody.innerHTML = filtered.map(r => `
+    <tr onclick="openDetail('${r.id}')">
+      <td title="${esc(r.empresa)}" style="font-weight:500">${esc(r.empresa)||'<span style="color:var(--text3)">—</span>'}</td>
+      <td title="${esc(r.persona)}">${esc(r.persona)||'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)" title="${esc(r.email)}">
+        ${r.email ? `<a href="mailto:${esc(r.email.split('/')[0].trim())}" onclick="event.stopPropagation()">${esc(r.email)}</a>` : '<span style="color:var(--text3)">—</span>'}
+      </td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px" title="${esc(r.telefono)}">${esc(r.telefono)||'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="font-size:12px;color:var(--text2)">${esc(r.ultimo_contacto)||''}</td>
+      <td><span class="badge ${badgeClass(r.fuente)}">${esc(normFuente(r.fuente))}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${esc(r.pais)||''}</td>
+    </tr>`).join('');
+}
+
+function openDetail(id) {
+  const r = DATA.find(x => x.id === id);
+  if (!r) return;
+  currentDetail = id;
+  document.getElementById('dEmpresa').textContent = r.empresa || '—';
+  document.getElementById('dPersona').textContent = r.persona || '';
+  document.getElementById('dCargo').textContent   = r.cargo   || '';
+  document.getElementById('dCargoDet').textContent= r.cargo   || '—';
+  document.getElementById('dUlt').textContent     = r.ultimo_contacto || '—';
+  document.getElementById('dPais').textContent    = r.pais    || '—';
+  document.getElementById('dFuente').textContent  = r.fuente  || '—';
+  document.getElementById('dEstado').textContent  = r.estado  || '—';
+  const emailEl = document.getElementById('dEmail');
+  if (r.email) {
+    const parts = r.email.split('/').map(e=>e.trim()).filter(Boolean);
+    emailEl.innerHTML = parts.map(e=>`<a href="mailto:${esc(e)}">${esc(e)}</a>`).join('<br>')
+      + `<button class="copy-btn" onclick="copyText('${esc(r.email)}')">copiar</button>`;
+  } else emailEl.textContent = '—';
+  const tlfEl = document.getElementById('dTlf');
+  tlfEl.innerHTML = r.telefono
+    ? `${esc(r.telefono)} <button class="copy-btn" onclick="copyText('${esc(r.telefono)}')">copiar</button>`
+    : '—';
+  const notasSec = document.getElementById('dNotasSec');
+  if (r.notas) { notasSec.style.display='block'; document.getElementById('dNotas').textContent=r.notas; }
+  else          { notasSec.style.display='none'; }
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  currentDetail = null;
+}
+
+// ===== MODAL CONTACTO =====
+function openModal(id) {
+  editingId = id || null;
+  const r = id ? DATA.find(x=>x.id===id) : null;
+  document.getElementById('modalTitle').textContent = r ? 'Editar contacto' : 'Nuevo contacto';
+  document.getElementById('fEmpresa').value  = r?.empresa || '';
+  document.getElementById('fPersona').value  = r?.persona || '';
+  document.getElementById('fCargo').value    = r?.cargo || '';
+  document.getElementById('fEmail').value    = r?.email || '';
+  document.getElementById('fTlf').value      = r?.telefono || '';
+  document.getElementById('fPais').value     = r?.pais || '';
+  document.getElementById('fUlt').value      = r?.ultimo_contacto || '';
+  document.getElementById('fFuente').value   = r?.fuente || 'Contacto directo';
+  document.getElementById('fEstado').value   = r?.estado || '';
+  document.getElementById('fNotas').value    = r?.notas || '';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('contactModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('contactModal').style.display = 'none'; }
+
+async function saveContact() {
+  const btn = document.getElementById('modalSaveBtn');
+  const err = document.getElementById('modalError');
+  err.style.display = 'none';
+  const body = {
+    action: editingId ? 'updateContact' : 'addContact',
+    token: SESSION.token,
+    id: editingId,
+    empresa: document.getElementById('fEmpresa').value.trim(),
+    persona: document.getElementById('fPersona').value.trim(),
+    cargo:   document.getElementById('fCargo').value.trim(),
+    email:   document.getElementById('fEmail').value.trim(),
+    telefono:document.getElementById('fTlf').value.trim(),
+    pais:    document.getElementById('fPais').value.trim(),
+    ultimo_contacto: document.getElementById('fUlt').value.trim(),
+    fuente:  document.getElementById('fFuente').value,
+    estado:  document.getElementById('fEstado').value.trim(),
+    notas:   document.getElementById('fNotas').value.trim(),
+    creado_por: SESSION.username,
+  };
+  if (!body.empresa && !body.email) {
+    err.textContent = 'Al menos empresa o email son obligatorios.'; err.style.display='block'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const res = await api(body);
+    if (res.ok) {
+      toast(editingId ? 'Contacto actualizado ✓' : 'Contacto añadido ✓', 'success');
+      closeModal(); loadContacts();
+    } else {
+      err.textContent = res.error; err.style.display = 'block';
+    }
+  } catch(e) { err.textContent = 'Error de conexión.'; err.style.display='block'; }
+  btn.disabled = false; btn.textContent = 'Guardar';
+}
+
+async function deleteContact(id) {
+  if (!id || SESSION.role !== 'admin') return;
+  const r = DATA.find(x=>x.id===id);
+  if (!confirm(`¿Eliminar "${r?.empresa || 'este contacto'}"? Esta acción no se puede deshacer.`)) return;
+  const res = await api({ action:'deleteContact', token:SESSION.token, id });
+  if (res.ok) { toast('Contacto eliminado', 'success'); closeDetail(); loadContacts(); }
+  else toast(res.error, 'error');
+}
+
+// ===== USERS =====
+async function loadUsers() {
+  const grid = document.getElementById('usersGrid');
+  grid.innerHTML = '<div style="color:var(--text3);font-size:13px;">Cargando…</div>';
+  const res = await api({ action:'getUsers', token:SESSION.token });
+  if (!res.ok) { grid.innerHTML = `<div style="color:var(--red)">${res.error}</div>`; return; }
+  grid.innerHTML = res.data.map(u => `
+    <div class="user-card ${!u.activo?'uc-inactive':''}">
+      <div class="uc-top">
+        <div class="uc-avatar ${u.role}">${(u.nombre||u.username)[0].toUpperCase()}</div>
+        <div>
+          <div class="uc-name">${esc(u.nombre||u.username)}</div>
+          <div class="uc-role">${u.username} · ${u.role==='admin'?'Administrador':'Usuario'}</div>
+        </div>
+      </div>
+      <div class="uc-actions">
+        <button class="uc-btn" onclick="openPassModal('${esc(u.username)}')">Cambiar contraseña</button>
+        ${u.username!==SESSION.username?`
+          <button class="uc-btn" onclick="toggleUser('${esc(u.username)}',${!u.activo})">${u.activo?'Desactivar':'Activar'}</button>
+          <button class="uc-btn" style="color:var(--red)" onclick="removeUser('${esc(u.username)}')">Eliminar</button>
+        `:''}
+      </div>
+    </div>`).join('');
+}
+
+function openUserModal() {
+  document.getElementById('uUsername').value=''; document.getElementById('uNombre').value='';
+  document.getElementById('uPass').value=''; document.getElementById('uRole').value='user';
+  document.getElementById('userModalError').style.display='none';
+  document.getElementById('userModal').style.display='flex';
+}
+function closeUserModal() { document.getElementById('userModal').style.display='none'; }
+
+async function saveUser() {
+  const btn = document.getElementById('userSaveBtn');
+  const err = document.getElementById('userModalError');
+  err.style.display='none';
+  const username = document.getElementById('uUsername').value.trim().toLowerCase();
+  const nombre   = document.getElementById('uNombre').value.trim();
+  const password = document.getElementById('uPass').value;
+  const role     = document.getElementById('uRole').value;
+  if (!username||!password) { err.textContent='Usuario y contraseña son obligatorios.'; err.style.display='block'; return; }
+  if (password.length < 6)  { err.textContent='La contraseña debe tener al menos 6 caracteres.'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Creando…';
+  const res = await api({ action:'addUser', token:SESSION.token, username, nombre:nombre||username, password, role });
+  if (res.ok) { toast('Usuario creado ✓','success'); closeUserModal(); loadUsers(); }
+  else { err.textContent=res.error; err.style.display='block'; }
+  btn.disabled=false; btn.textContent='Crear usuario';
+}
+
+async function toggleUser(username, active) {
+  const res = await api({ action:'updateUser', token:SESSION.token, username, activo:active });
+  if (res.ok) { toast(active?'Usuario activado':'Usuario desactivado','success'); loadUsers(); }
+  else toast(res.error,'error');
+}
+
+async function removeUser(username) {
+  if (!confirm(`¿Eliminar el usuario "${username}"?`)) return;
+  const res = await api({ action:'deleteUser', token:SESSION.token, username });
+  if (res.ok) { toast('Usuario eliminado','success'); loadUsers(); }
+  else toast(res.error,'error');
+}
+
+function openPassModal(username) {
+  changingPassFor = username;
+  document.getElementById('passUsername').textContent = username;
+  document.getElementById('newPass').value=''; document.getElementById('confirmPass').value='';
+  document.getElementById('passModalError').style.display='none';
+  document.getElementById('passModal').style.display='flex';
+}
+function closePassModal() { document.getElementById('passModal').style.display='none'; }
+
+async function savePassword() {
+  const err = document.getElementById('passModalError');
+  const np = document.getElementById('newPass').value;
+  const cp = document.getElementById('confirmPass').value;
+  if (np.length < 6) { err.textContent='Mínimo 6 caracteres.'; err.style.display='block'; return; }
+  if (np !== cp)     { err.textContent='Las contraseñas no coinciden.'; err.style.display='block'; return; }
+  const res = await api({ action:'changePassword', token:SESSION.token, username:changingPassFor, newPassword:np });
+  if (res.ok) { toast('Contraseña cambiada ✓','success'); closePassModal(); }
+  else { err.textContent=res.error; err.style.display='block'; }
+}
+
+// ===== UTILS =====
+function exportCSV() {
+  const cols=['empresa','persona','cargo','email','telefono','ultimo_contacto','fuente','pais','estado','notas'];
+  const rows=filtered.map(r=>cols.map(c=>`"${(r[c]||'').replace(/"/g,'""')}"`).join(','));
+  const blob=new Blob(['\uFEFF'+[cols.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='navieras_crm.csv'; a.click();
+}
+
+function copyText(t) {
+  navigator.clipboard.writeText(t).catch(()=>{
+    const el=document.createElement('textarea'); el.value=t; document.body.appendChild(el); el.select(); document.execCommand('copy'); el.remove();
+  });
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show' + (type?' '+type:'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ===== AGENCIAS =====
+let AG_DATA = [];
+let agFiltered = [];
+let agSortState = { col: null, asc: true };
+let agFilterType = 'all';
+let currentAgDetail = null;
+let editingAgId = null;
+
+const AG_COLS = ['id','nombre','tipo','pais','persona','cargo','email','telefono','web',
+                 'puertos','buques','servicios','ultimo_contacto','estado','notas','creado_por','creado_en'];
+
+async function loadAgencias() {
+  document.getElementById('agTableBody').innerHTML =
+    '<tr class="loading-row"><td colspan="7"><div class="spinner"></div> Cargando…</td></tr>';
+  try {
+    const res = await api({ action:'getAgencias', token: SESSION.token });
+    if (!res.ok) { toast(res.error,'error'); return; }
+    AG_DATA = res.data || [];
+    agApplyFilters();
+  } catch(e) {
+    document.getElementById('agTableBody').innerHTML =
+      '<tr class="loading-row"><td colspan="7" style="color:var(--red)">Error de conexión</td></tr>';
+  }
+}
+
+function setAgFilter(val, btn) {
+  agFilterType = val;
+  document.querySelectorAll('[data-ag]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  agApplyFilters();
+}
+
+function agApplyFilters() {
+  const q = document.getElementById('agSearchInput').value.toLowerCase().trim();
+  agFiltered = AG_DATA.filter(r => {
+    if (agFilterType !== 'all' && r.tipo !== agFilterType) return false;
+    if (q) {
+      const hay = [r.nombre,r.tipo,r.persona,r.email,r.telefono,r.puertos,r.buques,r.servicios,r.pais,r.notas].join(' ').toLowerCase();
+      if (!q.split(' ').every(t => hay.includes(t))) return false;
+    }
+    return true;
+  });
+  if (agSortState.col) {
+    agFiltered.sort((a,b) => {
+      const av=(a[agSortState.col]||'').toLowerCase(), bv=(b[agSortState.col]||'').toLowerCase();
+      return agSortState.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+  }
+  document.getElementById('agResultsLabel').textContent = `${agFiltered.length} agencia${agFiltered.length!==1?'s':''}`;
+  renderAgTable();
+}
+
+function agSortBy(col) {
+  agSortState.asc = agSortState.col===col ? !agSortState.asc : true;
+  agSortState.col = col;
+  agApplyFilters();
+}
+
+function agTipoBadge(tipo) {
+  const m = {
+    'Agencia consignataria':'b-directo','Agencia de carga':'b-campana',
+    'Transitaria':'b-linkedin','Bróker':'b-intl',
+    'Operador portuario':'b-pendiente','Otro':'b-crm'
+  };
+  return m[tipo] || 'b-crm';
+}
+
+function renderAgTable() {
+  const tbody = document.getElementById('agTableBody');
+  if (!agFiltered.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Sin resultados</td></tr>'; return;
+  }
+  tbody.innerHTML = agFiltered.map(r => `
+    <tr onclick="openAgDetail('${esc(r.id)}')">
+      <td style="font-weight:500" title="${esc(r.nombre)}">${esc(r.nombre)||'—'}</td>
+      <td>${r.tipo ? `<span class="badge ${agTipoBadge(r.tipo)}">${esc(r.tipo)}</span>` : ''}</td>
+      <td title="${esc(r.persona)}">${esc(r.persona)||'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)" title="${esc(r.email)}">
+        ${r.email?`<a href="mailto:${esc(r.email)}" onclick="event.stopPropagation()">${esc(r.email)}</a>`:'<span style="color:var(--text3)">—</span>'}
+      </td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px" title="${esc(r.telefono)}">${esc(r.telefono)||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)" title="${esc(r.puertos)}">${esc(r.puertos)||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)" title="${esc(r.buques)}">${esc(r.buques)||'—'}</td>
+    </tr>`).join('');
+}
+
+function openAgDetail(id) {
+  const r = AG_DATA.find(x => x.id === id);
+  if (!r) return;
+  currentAgDetail = id;
+  document.getElementById('agDNombre').textContent  = r.nombre || '—';
+  document.getElementById('agDTipo').textContent    = r.tipo   || '';
+  document.getElementById('agDPais').textContent    = r.pais   || '';
+  document.getElementById('agDPersona').textContent = r.persona || '—';
+  document.getElementById('agDCargo').textContent   = r.cargo  || '—';
+  const emailEl = document.getElementById('agDEmail');
+  emailEl.innerHTML = r.email
+    ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a> <button class="copy-btn" onclick="copyText('${esc(r.email)}')">copiar</button>`
+    : '—';
+  document.getElementById('agDTlf').innerHTML = r.telefono
+    ? `${esc(r.telefono)} <button class="copy-btn" onclick="copyText('${esc(r.telefono)}')">copiar</button>`
+    : '—';
+  document.getElementById('agDWeb').innerHTML = r.web
+    ? `<a href="${r.web.startsWith('http')?esc(r.web):'https://'+esc(r.web)}" target="_blank">${esc(r.web)}</a>`
+    : '—';
+  document.getElementById('agDPuertos').textContent  = r.puertos   || '—';
+  document.getElementById('agDBuques').textContent   = r.buques    || '—';
+  document.getElementById('agDServicios').textContent= r.servicios || '—';
+  document.getElementById('agDPaisD').textContent    = r.pais      || '—';
+  document.getElementById('agDEstado').textContent   = r.estado    || '—';
+  document.getElementById('agDUlt').textContent      = r.ultimo_contacto || '—';
+  const notasSec = document.getElementById('agDNotasSec');
+  if (r.notas) { notasSec.style.display='block'; document.getElementById('agDNotas').textContent=r.notas; }
+  else notasSec.style.display='none';
+  document.getElementById('agDetailPanel').classList.add('open');
+}
+
+function closeAgDetail() {
+  document.getElementById('agDetailPanel').classList.remove('open');
+  currentAgDetail = null;
+}
+
+function openAgModal(id) {
+  editingAgId = id || null;
+  const r = id ? AG_DATA.find(x => x.id===id) : null;
+  document.getElementById('agModalTitle').textContent = r ? 'Editar agencia' : 'Nueva agencia';
+  document.getElementById('agFNombre').value    = r?.nombre    || '';
+  document.getElementById('agFTipo').value      = r?.tipo      || '';
+  document.getElementById('agFPais').value      = r?.pais      || '';
+  document.getElementById('agFPersona').value   = r?.persona   || '';
+  document.getElementById('agFCargo').value     = r?.cargo     || '';
+  document.getElementById('agFEmail').value     = r?.email     || '';
+  document.getElementById('agFTlf').value       = r?.telefono  || '';
+  document.getElementById('agFWeb').value       = r?.web       || '';
+  document.getElementById('agFPuertos').value   = r?.puertos   || '';
+  document.getElementById('agFBuques').value    = r?.buques    || '';
+  document.getElementById('agFServicios').value = r?.servicios || '';
+  document.getElementById('agFUlt').value       = r?.ultimo_contacto || '';
+  document.getElementById('agFEstado').value    = r?.estado    || '';
+  document.getElementById('agFNotas').value     = r?.notas     || '';
+  document.getElementById('agModalError').style.display = 'none';
+  document.getElementById('agModal').style.display = 'flex';
+}
+
+function closeAgModal() { document.getElementById('agModal').style.display = 'none'; }
+
+async function saveAgencia() {
+  const btn = document.getElementById('agSaveBtn');
+  const err = document.getElementById('agModalError');
+  err.style.display = 'none';
+  const nombre = document.getElementById('agFNombre').value.trim();
+  if (!nombre) { err.textContent = 'El nombre de la agencia es obligatorio.'; err.style.display='block'; return; }
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const body = {
+    action: editingAgId ? 'updateAgencia' : 'addAgencia',
+    token: SESSION.token,
+    id: editingAgId,
+    nombre,
+    tipo:            document.getElementById('agFTipo').value,
+    pais:            document.getElementById('agFPais').value.trim(),
+    persona:         document.getElementById('agFPersona').value.trim(),
+    cargo:           document.getElementById('agFCargo').value.trim(),
+    email:           document.getElementById('agFEmail').value.trim(),
+    telefono:        document.getElementById('agFTlf').value.trim(),
+    web:             document.getElementById('agFWeb').value.trim(),
+    puertos:         document.getElementById('agFPuertos').value.trim(),
+    buques:          document.getElementById('agFBuques').value.trim(),
+    servicios:       document.getElementById('agFServicios').value.trim(),
+    ultimo_contacto: document.getElementById('agFUlt').value.trim(),
+    estado:          document.getElementById('agFEstado').value.trim(),
+    notas:           document.getElementById('agFNotas').value.trim(),
+    creado_por:      SESSION.username,
+  };
+  try {
+    const res = await api(body);
+    if (res.ok) {
+      toast(editingAgId ? 'Agencia actualizada ✓' : 'Agencia añadida ✓', 'success');
+      closeAgModal(); loadAgencias();
+    } else { err.textContent = res.error; err.style.display='block'; }
+  } catch(e) { err.textContent = 'Error de conexión.'; err.style.display='block'; }
+  btn.disabled = false; btn.textContent = 'Guardar';
+}
+
+async function deleteAgencia(id) {
+  if (!id || SESSION.role !== 'admin') return;
+  const r = AG_DATA.find(x => x.id===id);
+  if (!confirm(`¿Eliminar "${r?.nombre || 'esta agencia'}"?`)) return;
+  const res = await api({ action:'deleteAgencia', token:SESSION.token, id });
+  if (res.ok) { toast('Agencia eliminada','success'); closeAgDetail(); loadAgencias(); }
+  else toast(res.error,'error');
+}
+
+function exportAgCSV() {
+  const cols = ['nombre','tipo','pais','persona','cargo','email','telefono','web','puertos','buques','servicios','ultimo_contacto','estado','notas'];
+  const rows = agFiltered.map(r => cols.map(c=>`"${(r[c]||'').replace(/"/g,'""')}"`).join(','));
+  const blob = new Blob(['\uFEFF'+[cols.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='agencias_maritimas.csv'; a.click();
+}
+let importRows = [];
+let importHeaders = [];
+
+const CRM_FIELDS = [
+  { key:'empresa',          label:'Empresa' },
+  { key:'persona',          label:'Persona' },
+  { key:'cargo',            label:'Cargo' },
+  { key:'email',            label:'Email' },
+  { key:'telefono',         label:'Teléfono' },
+  { key:'ultimo_contacto',  label:'Último contacto' },
+  { key:'fuente',           label:'Fuente' },
+  { key:'pais',             label:'País' },
+  { key:'estado',           label:'Estado' },
+  { key:'notas',            label:'Notas' },
+];
+
+// Auto-map heuristics
+const AUTO_MAP = {
+  empresa:['empresa','company','compañia','compania','nombre empresa','razon social','razón social'],
+  persona:['persona','contacto','nombre','contact','name','person','representante'],
+  cargo:['cargo','puesto','position','title','titulo','role'],
+  email:['email','correo','mail','e-mail','correo electronico','correo electrónico'],
+  telefono:['telefono','teléfono','tlf','phone','tel','movil','móvil','celular'],
+  ultimo_contacto:['ultimo contacto','último contacto','fecha','date','last contact','fecha contacto'],
+  fuente:['fuente','source','origen','procedencia'],
+  pais:['pais','país','country','nacion','nación'],
+  estado:['estado','status','situacion','situación'],
+  notas:['notas','notes','comentarios','observaciones','nota'],
+};
+
+function openImport() {
+  importRows = []; importHeaders = [];
+  document.getElementById('importStep1').style.display = 'block';
+  document.getElementById('importStep2').style.display = 'none';
+  document.getElementById('importStep3').style.display = 'none';
+  document.getElementById('importBtn').style.display = 'none';
+  document.getElementById('importFile').value = '';
+  document.getElementById('importModal').style.display = 'flex';
+  const drop = document.getElementById('importDrop');
+  drop.addEventListener('dragover', e=>{e.preventDefault();drop.classList.add('drag');});
+  drop.addEventListener('dragleave', ()=>drop.classList.remove('drag'));
+  drop.addEventListener('drop', e=>{e.preventDefault();drop.classList.remove('drag');handleImportFile(e.dataTransfer.files[0]);});
+}
+
+function closeImport() {
+  document.getElementById('importModal').style.display = 'none';
+}
+
+function handleImportFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      if (raw.length < 2) { toast('El archivo está vacío','error'); return; }
+      importHeaders = raw[0].map(String);
+      importRows = raw.slice(1).filter(r => r.some(c => c !== ''));
+      showColMapper(file.name);
+    } catch(err) { toast('Error leyendo el archivo: '+err.message,'error'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showColMapper(filename) {
+  document.getElementById('importStep1').style.display = 'none';
+  document.getElementById('importStep2').style.display = 'block';
+  document.getElementById('importBtn').style.display = 'block';
+  document.getElementById('importPreview').innerHTML =
+    `<strong>${esc(filename)}</strong> — ${importRows.length} filas detectadas · ${importHeaders.length} columnas`;
+
+  const grid = document.getElementById('colMapGrid');
+  grid.innerHTML = CRM_FIELDS.map(f => {
+    const autoIdx = autoDetect(f.key, importHeaders);
+    const opts = importHeaders.map((h,i) =>
+      `<option value="${i}" ${autoIdx===i?'selected':''}>${esc(h)}</option>`
+    ).join('');
+    return `
+      <div class="col-map-row">
+        <div class="col-map-label">${f.label}</div>
+        <select class="col-map-select" id="map_${f.key}">
+          <option value="">— ignorar —</option>
+          ${opts}
+        </select>
+      </div>`;
+  }).join('');
+}
+
+function autoDetect(field, headers) {
+  const synonyms = AUTO_MAP[field] || [];
+  for (let i=0; i<headers.length; i++) {
+    const h = headers[i].toLowerCase().trim();
+    if (synonyms.some(s => h.includes(s) || s.includes(h))) return i;
+  }
+  return -1;
+}
+
+async function runImport() {
+  document.getElementById('importStep2').style.display = 'none';
+  document.getElementById('importStep3').style.display = 'block';
+  document.getElementById('importBtn').style.display = 'none';
+
+  const mapping = {};
+  CRM_FIELDS.forEach(f => {
+    const val = document.getElementById('map_'+f.key)?.value;
+    if (val !== '') mapping[f.key] = parseInt(val);
+  });
+
+  const total = importRows.length;
+  let done = 0, errors = 0;
+  const BATCH = 5; // enviar de 5 en 5 para no saturar
+
+  const setProgress = (n) => {
+    const pct = Math.round((n/total)*100);
+    document.getElementById('importProgressBar').style.width = pct+'%';
+    document.getElementById('importStatus').textContent =
+      `Importando… ${n} de ${total} contactos`;
+  };
+
+  for (let i=0; i<importRows.length; i+=BATCH) {
+    const batch = importRows.slice(i, i+BATCH);
+    await Promise.all(batch.map(async row => {
+      const body = { action:'addContact', token: SESSION.token, creado_por: SESSION.username };
+      CRM_FIELDS.forEach(f => {
+        const idx = mapping[f.key];
+        body[f.key] = idx !== undefined ? String(row[idx]||'').trim() : '';
+      });
+      // Skip completely empty rows
+      if (!body.empresa && !body.email && !body.persona) { done++; return; }
+      try { await api(body); } catch(e) { errors++; }
+      done++;
+      setProgress(done);
+    }));
+    setProgress(done);
+  }
+
+  document.getElementById('importStatus').textContent =
+    errors > 0
+      ? `✓ Importación completada — ${done-errors} ok, ${errors} errores`
+      : `✓ ${done} contactos importados correctamente`;
+  document.getElementById('importProgressBar').style.background = errors>0 ? 'var(--amber)' : 'var(--green)';
+
+  setTimeout(() => {
+    closeImport();
+    loadContacts();
+    toast(`${done-errors} contactos importados ✓`, 'success');
+  }, 1500);
+}
+</script>
+<!-- SheetJS for Excel parsing -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
