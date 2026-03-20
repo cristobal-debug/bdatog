@@ -487,7 +487,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
           <button class="btn-add" onclick="openModal()">＋ <span>Nuevo contacto</span></button>
           <button class="btn-import" onclick="openImport()">↑ <span>Importar Excel</span></button>
           <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
-          <button class="btn-sec" onclick="loadContacts()">↻</button>
+          <button class="btn-sec" onclick="CACHE.contacts=null;loadContacts()">↻</button>
           <span class="results-label" id="resultsLabel">cargando…</span>
         </div>
 
@@ -576,7 +576,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
       </div>
       <button class="btn-add" onclick="openAgModal()">＋ <span>Nueva agencia</span></button>
       <button class="btn-sec" onclick="exportAgCSV()">↓ CSV</button>
-      <button class="btn-sec" onclick="loadAgencias()">↻</button>
+      <button class="btn-sec" onclick="CACHE.agencias=null;loadAgencias()">↻</button>
       <span class="results-label" id="agResultsLabel">cargando…</span>
     </div>
 
@@ -676,7 +676,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
     </div>
     <button class="btn-add" onclick="openAdModal()">＋ <span>Nuevo contacto</span></button>
     <button class="btn-sec" onclick="exportAdCSV()">↓ CSV</button>
-    <button class="btn-sec" onclick="loadAgenda()">↻</button>
+    <button class="btn-sec" onclick="CACHE.agenda=null;loadAgenda()">↻</button>
     <span class="results-label" id="adResultsLabel">cargando…</span>
   </div>
 
@@ -1025,6 +1025,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== TABS =====
+// Cache — datos en memoria para no recargar cada vez
+const CACHE = { contacts: null, agencias: null, agenda: null, users: null };
+
 function showTab(tab) {
   document.getElementById('contactsView').style.display  = tab==='contacts'  ? 'flex'  : 'none';
   document.getElementById('agenciasView').style.display  = tab==='agencias'  ? 'flex'  : 'none';
@@ -1035,9 +1038,13 @@ function showTab(tab) {
   document.getElementById('tabAgencias').classList.toggle('active', tab==='agencias');
   document.getElementById('tabAgenda').classList.toggle('active',   tab==='agenda');
   document.getElementById('tabUsers').classList.toggle('active',    tab==='users');
-  if (tab==='users')    loadUsers();
-  if (tab==='agencias') loadAgencias();
-  if (tab==='agenda')   loadAgenda();
+  // Solo carga si no hay datos en caché
+  if (tab==='users'    && !CACHE.users)    loadUsers();
+  else if (tab==='users')                  renderUsers(CACHE.users);
+  if (tab==='agencias' && !CACHE.agencias) loadAgencias();
+  else if (tab==='agencias' && CACHE.agencias) { AG_DATA = CACHE.agencias; agApplyFilters(); }
+  if (tab==='agenda'   && !CACHE.agenda)   loadAgenda();
+  else if (tab==='agenda' && CACHE.agenda) { AD_DATA = CACHE.agenda; adApplyFilters(); }
 }
 
 // ===== API =====
@@ -1060,12 +1067,18 @@ async function api(body) {
 
 // ===== CONTACTS =====
 async function loadContacts() {
+  // Use cache if available
+  if (CACHE.contacts) {
+    DATA = CACHE.contacts;
+    updateCounts(); applyFilters(); return;
+  }
   document.getElementById('tableBody').innerHTML =
     '<tr class="loading-row"><td colspan="7"><div class="spinner"></div> Cargando…</td></tr>';
   try {
     const res = await api({ action:'getContacts', token: SESSION.token });
     if (!res.ok) { toast(res.error, 'error'); return; }
     DATA = res.data.map((r,i) => ({...r, _idx: i}));
+    CACHE.contacts = DATA;
     updateCounts();
     applyFilters();
   } catch(e) {
@@ -1255,7 +1268,7 @@ async function saveContact() {
     const res = await api(body);
     if (res.ok) {
       toast(editingId ? 'Contacto actualizado ✓' : 'Contacto añadido ✓', 'success');
-      closeModal(); loadContacts();
+      CACHE.contacts=null; closeModal(); loadContacts();
     } else {
       err.textContent = res.error; err.style.display = 'block';
     }
@@ -1268,7 +1281,7 @@ async function deleteContact(id) {
   const r = DATA.find(x=>x.id===id);
   if (!confirm(`¿Eliminar "${r?.empresa || 'este contacto'}"? Esta acción no se puede deshacer.`)) return;
   const res = await api({ action:'deleteContact', token:SESSION.token, id });
-  if (res.ok) { toast('Contacto eliminado', 'success'); closeDetail(); loadContacts(); }
+  if (res.ok) { toast('Contacto eliminado', 'success'); CACHE.contacts=null; closeDetail(); loadContacts(); }
   else toast(res.error, 'error');
 }
 
@@ -1393,12 +1406,14 @@ const AG_COLS = ['id','nombre','tipo','pais','persona','cargo','email','telefono
                  'puertos','buques','servicios','ultimo_contacto','estado','notas','creado_por','creado_en'];
 
 async function loadAgencias() {
+  if (CACHE.agencias) { AG_DATA = CACHE.agencias; agApplyFilters(); return; }
   document.getElementById('agTableBody').innerHTML =
     '<tr class="loading-row"><td colspan="7"><div class="spinner"></div> Cargando…</td></tr>';
   try {
     const res = await api({ action:'getAgencias', token: SESSION.token });
     if (!res.ok) { toast(res.error,'error'); return; }
     AG_DATA = res.data || [];
+    CACHE.agencias = AG_DATA;
     agApplyFilters();
   } catch(e) {
     document.getElementById('agTableBody').innerHTML =
@@ -1558,7 +1573,7 @@ async function saveAgencia() {
     const res = await api(body);
     if (res.ok) {
       toast(editingAgId ? 'Agencia actualizada ✓' : 'Agencia añadida ✓', 'success');
-      closeAgModal(); loadAgencias();
+      CACHE.agencias=null; closeAgModal(); loadAgencias();
     } else { err.textContent = res.error; err.style.display='block'; }
   } catch(e) { err.textContent = 'Error de conexión.'; err.style.display='block'; }
   btn.disabled = false; btn.textContent = 'Guardar';
@@ -1569,7 +1584,7 @@ async function deleteAgencia(id) {
   const r = AG_DATA.find(x => x.id===id);
   if (!confirm(`¿Eliminar "${r?.nombre || 'esta agencia'}"?`)) return;
   const res = await api({ action:'deleteAgencia', token:SESSION.token, id });
-  if (res.ok) { toast('Agencia eliminada','success'); closeAgDetail(); loadAgencias(); }
+  if (res.ok) { toast('Agencia eliminada','success'); CACHE.agencias=null; closeAgDetail(); loadAgencias(); }
   else toast(res.error,'error');
 }
 
@@ -1597,12 +1612,14 @@ function adInitials(nombre, apellidos) {
 }
 
 async function loadAgenda() {
+  if (CACHE.agenda) { AD_DATA = CACHE.agenda; adApplyFilters(); return; }
   document.getElementById('adList').innerHTML =
     '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:13px;"><div class="spinner"></div><br>Cargando…</div>';
   try {
     const res = await api({ action:'getAgenda', token: SESSION.token });
     if (!res.ok) { toast(res.error,'error'); return; }
     AD_DATA = res.data || [];
+    CACHE.agenda = AD_DATA;
     adApplyFilters();
   } catch(e) {
     document.getElementById('adList').innerHTML =
@@ -1668,7 +1685,7 @@ function openAdDetail(id) {
   document.getElementById('adCardCargo').textContent   = r.cargo   ||'';
   document.getElementById('adCardEmpresa').textContent = r.empresa ||'';
   const callBtn=document.getElementById('adActionCall');
-  callBtn.href=r.movil?`tel:${r.movil.replace(/\s/g,'')}`:'#';
+  callBtn.href=r.movil?`tel:${String(r.movil||'').replace(/\s/g,'')}`:'#';
   callBtn.style.opacity=r.movil?'1':'.35'; callBtn.style.pointerEvents=r.movil?'auto':'none';
   const mailBtn=document.getElementById('adActionMail');
   mailBtn.href=r.email?`mailto:${r.email}`:'#';
@@ -1677,8 +1694,8 @@ function openAdDetail(id) {
   if(r.linkedin){liBtn.style.display='flex';liBtn.href=r.linkedin.startsWith('http')?r.linkedin:'https://'+r.linkedin;}
   else liBtn.style.display='none';
   document.getElementById('adDeleteBtn').style.display=SESSION.role==='admin'?'flex':'none';
-  document.getElementById('adFMovil').innerHTML  =r.movil  ?`<a href="tel:${esc(r.movil.replace(/\s/g,''))}">${esc(r.movil)}</a>`:'—';
-  document.getElementById('adFFijo').innerHTML   =r.fijo   ?`<a href="tel:${esc(r.fijo.replace(/\s/g,''))}">${esc(r.fijo)}</a>`:'—';
+  document.getElementById('adFMovil').innerHTML  =r.movil  ?`<a href="tel:${esc(String(r.movil||'').replace(/\s/g,''))}">${esc(r.movil)}</a>`:'—';
+  document.getElementById('adFFijo').innerHTML   =r.fijo   ?`<a href="tel:${esc(String(r.fijo||'').replace(/\s/g,''))}">${esc(r.fijo)}</a>`:'—';
   document.getElementById('adFEmail').innerHTML  =r.email  ?`<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>`:'—';
   document.getElementById('adFEmail2').innerHTML =r.email2 ?`<a href="mailto:${esc(r.email2)}">${esc(r.email2)}</a>`:'—';
   document.getElementById('adFEmpresa').textContent=r.empresa||'—';
@@ -1738,7 +1755,7 @@ async function saveAd() {
     const res=await api(body);
     if(res.ok){
       toast(editingAdId?'Contacto actualizado ✓':'Contacto añadido ✓','success');
-      closeAdModal(); await loadAgenda();
+      CACHE.agenda=null; closeAdModal(); await loadAgenda();
       if(res.id) openAdDetail(res.id);
       else if(editingAdId) openAdDetail(editingAdId);
     } else {err.textContent=res.error;err.style.display='block';}
@@ -1801,12 +1818,12 @@ function renderAdCards() {
         </div>
       </div>
       <div class="ad-card-fields">
-        ${r.movil?`<div class="ad-card-field"><span>📞</span><a href="tel:${esc(r.movil.replace(/\s/g,''))}" onclick="event.stopPropagation()">${esc(r.movil)}</a></div>`:''}
+        ${r.movil?`<div class="ad-card-field"><span>📞</span><a href="tel:${esc(String(r.movil||'').replace(/\s/g,''))}" onclick="event.stopPropagation()">${esc(r.movil)}</a></div>`:''}
         ${r.email?`<div class="ad-card-field"><span>✉</span><a href="mailto:${esc(r.email)}" onclick="event.stopPropagation()">${esc(r.email)}</a></div>`:''}
         ${r.linkedin?`<div class="ad-card-field"><span>💼</span><a href="${r.linkedin.startsWith('http')?esc(r.linkedin):'https://'+esc(r.linkedin)}" target="_blank" onclick="event.stopPropagation()">${esc(r.linkedin.replace(/https?:\/\/(www\.)?/,''))}</a></div>`:''}
       </div>
       <div class="ad-card-btns">
-        ${r.movil?`<a class="ad-card-btn call" href="tel:${esc(r.movil.replace(/\s/g,''))}" onclick="event.stopPropagation()">📞 Llamar</a>`:''}
+        ${r.movil?`<a class="ad-card-btn call" href="tel:${esc(String(r.movil||'').replace(/\s/g,''))}" onclick="event.stopPropagation()">📞 Llamar</a>`:''}
         ${r.email?`<a class="ad-card-btn mail" href="mailto:${esc(r.email)}" onclick="event.stopPropagation()">✉ Email</a>`:''}
         <button class="ad-card-btn" onclick="event.stopPropagation();openAdModal('${esc(r.id)}')">✏️ Editar</button>
       </div>
