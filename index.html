@@ -390,6 +390,60 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
 .ad-card-btn:hover{background:var(--bg4);color:var(--text);}
 .ad-card-btn.call{border-color:rgba(46,204,138,.3);color:var(--green);background:var(--green-bg);}
 .ad-card-btn.mail{border-color:rgba(77,124,254,.3);color:var(--accent);background:var(--blue-bg);}
+
+/* ===== PROVEEDORES ===== */
+#proveedoresView{display:none;flex-direction:column;width:100%;height:100%;overflow:hidden;background:var(--bg);}
+.prov-toolbar{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0;background:var(--bg2);}
+.prov-filters{display:flex;gap:6px;padding:.6rem 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0;background:var(--bg);align-items:center;}
+.prov-filter-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-right:4px;}
+.pchip{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all .15s;flex-shrink:0;}
+.pchip:hover{background:var(--bg4);color:var(--text);}
+.pchip.active{border-color:var(--accent);color:var(--accent);background:rgba(77,124,254,0.1);}
+.pchip.prod.active{border-color:var(--green);color:var(--green);background:rgba(46,204,138,0.1);}
+.prov-body{flex:1;overflow:auto;padding:1.5rem;}
+.prov-pais-section{margin-bottom:2.5rem;}
+.prov-pais-title{font-size:13px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;display:flex;align-items:center;gap:10px;}
+.prov-pais-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+.prov-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .15s,transform .1s;}
+.prov-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.prov-card-header{padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.prov-card-name{font-size:16px;font-weight:600;color:var(--text);}
+.prov-card-pais{font-size:11px;color:var(--text3);margin-top:2px;}
+.prov-badge-wrap{display:flex;gap:5px;flex-wrap:wrap;}
+.prod-badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;}
+.pb-vlsfo{background:rgba(77,124,254,.15);color:#7aa3fe;}
+.pb-mgo{background:rgba(46,204,138,.15);color:#2ecc8a;}
+.pb-lsmgo{background:rgba(245,166,35,.15);color:#f5a623;}
+.pb-hsfo{background:rgba(168,85,247,.15);color:#a855f7;}
+.pb-ifo{background:rgba(255,92,92,.15);color:#ff5c5c;}
+.pb-ulsd{background:rgba(6,182,212,.15);color:#06b6d4;}
+.prov-ports{padding:0;}
+.prov-port-row{display:flex;align-items:flex-start;gap:10px;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer;}
+.prov-port-row:last-child{border-bottom:none;}
+.prov-port-row:hover{background:var(--bg3);}
+.prov-port-icon{width:28px;height:28px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px;}
+.prov-port-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3;}
+.prov-port-meta{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4;}
+.prov-port-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.prov-port-tag{font-size:10px;background:var(--bg4);color:var(--text2);padding:1px 7px;border-radius:5px;}
+.prov-port-tag.green{background:rgba(46,204,138,.1);color:var(--green);}
+.prov-port-tag.blue{background:rgba(77,124,254,.1);color:var(--accent);}
+.prov-port-tag.amber{background:rgba(245,166,35,.1);color:var(--amber);}
+.prov-card-footer{padding:.75rem 1.25rem;background:var(--bg3);display:flex;justify-content:space-between;align-items:center;}
+.prov-credit{font-size:11px;color:var(--text2);}
+.prov-credit strong{color:var(--text);}
+.prov-actions{display:flex;gap:6px;}
+.prov-btn{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.prov-btn:hover{background:var(--bg4);color:var(--text);}
+.prov-btn.primary{background:var(--blue-bg);border-color:rgba(77,124,254,.4);color:var(--accent);}
+.prov-btn.primary:hover{background:var(--accent);color:white;}
+/* Port detail modal */
+.port-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;}
+.port-detail-field{background:var(--bg3);border-radius:8px;padding:10px 12px;}
+.port-detail-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px;}
+.port-detail-val{font-size:13px;color:var(--text);line-height:1.5;}
+.port-detail-val.highlight{color:var(--green);font-weight:500;}
 </style>
 </head>
 <body>
@@ -427,6 +481,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
       <button class="nav-tab active" id="tabContacts" onclick="showTab('contacts')">Contactos</button>
       <button class="nav-tab" id="tabAgencias" onclick="showTab('agencias')">Agencias</button>
       <button class="nav-tab" id="tabAgenda" onclick="showTab('agenda')">📒 Mi Agenda</button>
+      <button class="nav-tab" id="tabProveedores" onclick="showTab('proveedores')">⛽ Proveedores</button>
       <button class="nav-tab admin-tab" id="tabUsers" onclick="showTab('users')" style="display:none">Usuarios</button>
     </div>
     <div class="header-right">
@@ -739,6 +794,111 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
 
 </div>
 
+<!-- ===== PROVEEDORES VIEW ===== -->
+<div id="proveedoresView">
+  <div class="prov-toolbar">
+    <div class="search-wrap" style="flex:1;min-width:180px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="provSearch" placeholder="Buscar proveedor, puerto, producto…" oninput="provApplyFilters()">
+    </div>
+    <button class="btn-add" onclick="openProvModal()">＋ <span>Nuevo proveedor</span></button>
+    <button class="btn-sec" onclick="CACHE.proveedores=null;loadProveedores()">↻</button>
+    <span class="results-label" id="provResultsLabel">cargando…</span>
+  </div>
+  <div class="prov-filters">
+    <span class="prov-filter-label">País:</span>
+    <button class="pchip active" data-pf="pais" data-pv="all" onclick="setProvFilter('pais','all',this)">Todos</button>
+    <button class="pchip" data-pf="pais" data-pv="Brazil" onclick="setProvFilter('pais','Brazil',this)">🇧🇷 Brasil</button>
+    <button class="pchip" data-pf="pais" data-pv="Colombia" onclick="setProvFilter('pais','Colombia',this)">🇨🇴 Colombia</button>
+    <button class="pchip" data-pf="pais" data-pv="Ecuador" onclick="setProvFilter('pais','Ecuador',this)">🇪🇨 Ecuador</button>
+    <button class="pchip" data-pf="pais" data-pv="Argentina" onclick="setProvFilter('pais','Argentina',this)">🇦🇷 Argentina</button>
+    <button class="pchip" data-pf="pais" data-pv="URUGUAY" onclick="setProvFilter('pais','URUGUAY',this)">🇺🇾 Uruguay</button>
+    <button class="pchip" data-pf="pais" data-pv="PERU" onclick="setProvFilter('pais','PERU',this)">🇵🇪 Perú</button>
+    <span class="prov-filter-label" style="margin-left:12px;">Producto:</span>
+    <button class="pchip prod" data-pf="prod" data-pv="all" onclick="setProvFilter('prod','all',this)">Todos</button>
+    <button class="pchip prod" data-pf="prod" data-pv="vlsfo" onclick="setProvFilter('prod','vlsfo',this)">VLSFO</button>
+    <button class="pchip prod" data-pf="prod" data-pv="mgo" onclick="setProvFilter('prod','mgo',this)">MGO</button>
+    <button class="pchip prod" data-pf="prod" data-pv="lsmgo" onclick="setProvFilter('prod','lsmgo',this)">LSMGO</button>
+    <button class="pchip prod" data-pf="prod" data-pv="hsfo" onclick="setProvFilter('prod','hsfo',this)">HSFO</button>
+    <button class="pchip prod" data-pf="prod" data-pv="ifo380" onclick="setProvFilter('prod','ifo380',this)">IFO380</button>
+  </div>
+  <div class="prov-body" id="provBody">
+    <div style="text-align:center;padding:3rem;color:var(--text3);"><div class="spinner"></div><br>Cargando proveedores…</div>
+  </div>
+</div>
+
+<!-- ===== MODAL PUERTO (detalle/edición) ===== -->
+<div class="modal-overlay" id="portModal" style="display:none;" onclick="if(event.target===this)closePortModal()">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="portModalTitle">Puerto</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="portModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closePortModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="portModalError"></div>
+      <div class="port-detail-grid">
+        <div class="form-group full" style="grid-column:1/-1;"><label>Puerto</label><input type="text" id="pfPuerto" placeholder="Nombre del puerto"></div>
+        <div class="form-group"><label>VLSFO</label><input type="text" id="pfVlsfo" placeholder="ej: VLSFO 0.5% 380 CST"></div>
+        <div class="form-group"><label>MGO</label><input type="text" id="pfMgo" placeholder="ej: MGO 0.5%"></div>
+        <div class="form-group"><label>LSMGO</label><input type="text" id="pfLsmgo" placeholder="ej: LSMGO 0.1%"></div>
+        <div class="form-group"><label>HSFO</label><input type="text" id="pfHsfo" placeholder="ej: HSFO 2.1%S"></div>
+        <div class="form-group"><label>IFO380</label><input type="text" id="pfIfo380" placeholder=""></div>
+        <div class="form-group"><label>ULSD</label><input type="text" id="pfUlsd" placeholder=""></div>
+        <div class="form-group"><label>Entrega por barcaza</label><input type="text" id="pfBarcaza" placeholder="ej: at anchorage / alongside"></div>
+        <div class="form-group"><label>Entrega por camión</label><input type="text" id="pfCamion" placeholder="ej: Sí / No"></div>
+        <div class="form-group"><label>Entrega por pipe</label><input type="text" id="pfPipe" placeholder="ej: expipe at berth"></div>
+        <div class="form-group"><label>Términos de crédito</label><input type="text" id="pfCredit" placeholder="ej: 30 DDD"></div>
+        <div class="form-group"><label>Nombre barcaza</label><input type="text" id="pfBarcazaNombre" placeholder="ej: MT China Spirit"></div>
+        <div class="form-group"><label>Calidades</label><input type="text" id="pfCalidades" placeholder="ej: ISO 8217:2017"></div>
+        <div class="form-group"><label>Quality Claim</label><input type="text" id="pfQuality" placeholder="ej: 21 Days"></div>
+        <div class="form-group full" style="grid-column:1/-1;"><label>Notas importantes</label>
+          <textarea id="pfNotas" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Restricciones, condiciones especiales, bunker only calls…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="portDeleteBtn" onclick="deletePort()" style="display:none;">Eliminar</button>
+      <button class="btn-sec" onclick="closePortModal()">Cancelar</button>
+      <button class="btn-primary" id="portSaveBtn" onclick="savePort()" style="width:auto;padding:8px 24px;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL NUEVO PROVEEDOR ===== -->
+<div class="modal-overlay" id="provModal" style="display:none;" onclick="if(event.target===this)closeProvModal()">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="provModalTitle">Nuevo proveedor</div>
+      <button class="modal-close" onclick="closeProvModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="provModalError"></div>
+      <div class="form-grid">
+        <div class="full form-group"><label>Nombre del proveedor *</label><input type="text" id="pvNombre" placeholder="ej: Petrobras"></div>
+        <div class="form-group"><label>País *</label>
+          <select id="pvPais" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+            <option value="Brazil">🇧🇷 Brasil</option>
+            <option value="Colombia">🇨🇴 Colombia</option>
+            <option value="Ecuador">🇪🇨 Ecuador</option>
+            <option value="Argentina">🇦🇷 Argentina</option>
+            <option value="URUGUAY">🇺🇾 Uruguay</option>
+            <option value="PERU">🇵🇪 Perú</option>
+            <option value="CHILE">🇨🇱 Chile</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Puerto inicial</label><input type="text" id="pvPuerto" placeholder="ej: Santos"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="closeProvModal()">Cancelar</button>
+      <button class="btn-primary" id="provSaveBtn" onclick="saveNewProv()" style="width:auto;padding:8px 24px;">Crear</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL CONTACTO ===== -->
 <div class="modal-overlay" id="contactModal" style="display:none;" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -1026,25 +1186,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ===== TABS =====
 // Cache — datos en memoria para no recargar cada vez
-const CACHE = { contacts: null, agencias: null, agenda: null, users: null };
+const CACHE = { contacts: null, agencias: null, agenda: null, users: null, proveedores: null };
 
 function showTab(tab) {
-  document.getElementById('contactsView').style.display  = tab==='contacts'  ? 'flex'  : 'none';
-  document.getElementById('agenciasView').style.display  = tab==='agencias'  ? 'flex'  : 'none';
-  document.getElementById('agendaView').style.display    = tab==='agenda'    ? 'flex'  : 'none';
+  document.getElementById('contactsView').style.display     = tab==='contacts'    ? 'flex'  : 'none';
+  document.getElementById('agenciasView').style.display     = tab==='agencias'    ? 'flex'  : 'none';
+  document.getElementById('agendaView').style.display       = tab==='agenda'      ? 'flex'  : 'none';
   document.getElementById('agendaView').style.flexDirection = 'column';
-  document.getElementById('usersView').style.display     = tab==='users'     ? 'block' : 'none';
-  document.getElementById('tabContacts').classList.toggle('active', tab==='contacts');
-  document.getElementById('tabAgencias').classList.toggle('active', tab==='agencias');
-  document.getElementById('tabAgenda').classList.toggle('active',   tab==='agenda');
-  document.getElementById('tabUsers').classList.toggle('active',    tab==='users');
-  // Solo carga si no hay datos en caché
-  if (tab==='users'    && !CACHE.users)    loadUsers();
-  else if (tab==='users')                  renderUsers(CACHE.users);
-  if (tab==='agencias' && !CACHE.agencias) loadAgencias();
-  else if (tab==='agencias' && CACHE.agencias) { AG_DATA = CACHE.agencias; agApplyFilters(); }
-  if (tab==='agenda'   && !CACHE.agenda)   loadAgenda();
-  else if (tab==='agenda' && CACHE.agenda) { AD_DATA = CACHE.agenda; adApplyFilters(); }
+  document.getElementById('proveedoresView').style.display  = tab==='proveedores' ? 'flex'  : 'none';
+  document.getElementById('proveedoresView').style.flexDirection = 'column';
+  document.getElementById('usersView').style.display        = tab==='users'       ? 'block' : 'none';
+  document.getElementById('tabContacts').classList.toggle('active',    tab==='contacts');
+  document.getElementById('tabAgencias').classList.toggle('active',    tab==='agencias');
+  document.getElementById('tabAgenda').classList.toggle('active',      tab==='agenda');
+  document.getElementById('tabProveedores').classList.toggle('active', tab==='proveedores');
+  document.getElementById('tabUsers').classList.toggle('active',       tab==='users');
+  if (tab==='users'        && !CACHE.users)        loadUsers();
+  else if (tab==='users')                          renderUsers(CACHE.users);
+  if (tab==='agencias'     && !CACHE.agencias)     loadAgencias();
+  else if (tab==='agencias'     && CACHE.agencias) { AG_DATA = CACHE.agencias; agApplyFilters(); }
+  if (tab==='agenda'       && !CACHE.agenda)       loadAgenda();
+  else if (tab==='agenda'       && CACHE.agenda)   { AD_DATA = CACHE.agenda; adApplyFilters(); }
+  if (tab==='proveedores'  && !CACHE.proveedores)  loadProveedores();
+  else if (tab==='proveedores'  && CACHE.proveedores) { PROV_DATA = CACHE.proveedores; provApplyFilters(); }
 }
 
 // ===== API =====
@@ -1982,6 +2146,286 @@ async function runImport() {
     loadContacts();
     toast(`${done-errors} contactos importados ✓`, 'success');
   }, 1500);
+}
+
+// ===== PROVEEDORES =====
+let PROV_DATA = [];
+let provFiltered = [];
+let provFilterPais = 'all';
+let provFilterProd = 'all';
+let editingPortId = null;
+let editingPortProveedor = null;
+let editingPortPais = null;
+
+const PAIS_FLAGS = {
+  'Brazil':'🇧🇷','Colombia':'🇨🇴','Ecuador':'🇪🇨','Argentina':'🇦🇷',
+  'URUGUAY':'🇺🇾','PERU':'🇵🇪','CHILE':'🇨🇱'
+};
+const PAIS_LABELS = {
+  'Brazil':'Brasil','Colombia':'Colombia','Ecuador':'Ecuador',
+  'Argentina':'Argentina','URUGUAY':'Uruguay','PERU':'Perú','CHILE':'Chile'
+};
+
+async function loadProveedores() {
+  if (CACHE.proveedores) { PROV_DATA = CACHE.proveedores; provApplyFilters(); return; }
+  document.getElementById('provBody').innerHTML =
+    '<div style="text-align:center;padding:3rem;color:var(--text3);"><div class="spinner"></div><br>Cargando proveedores…</div>';
+  try {
+    const res = await api({ action:'getProveedores', token: SESSION.token });
+    if (!res.ok) { toast(res.error,'error'); return; }
+    PROV_DATA = res.data || [];
+    CACHE.proveedores = PROV_DATA;
+    provApplyFilters();
+  } catch(e) {
+    document.getElementById('provBody').innerHTML =
+      '<div style="text-align:center;padding:3rem;color:var(--red);">Error de conexión</div>';
+  }
+}
+
+function setProvFilter(type, val, btn) {
+  if (type === 'pais') {
+    document.querySelectorAll('[data-pf="pais"]').forEach(b=>b.classList.remove('active'));
+    provFilterPais = val;
+  } else {
+    document.querySelectorAll('[data-pf="prod"]').forEach(b=>b.classList.remove('active'));
+    provFilterProd = val;
+  }
+  btn.classList.add('active');
+  provApplyFilters();
+}
+
+function provApplyFilters() {
+  const q = document.getElementById('provSearch').value.toLowerCase().trim();
+  provFiltered = PROV_DATA.filter(r => {
+    if (provFilterPais !== 'all' && r.pais !== provFilterPais) return false;
+    if (provFilterProd !== 'all' && !r[provFilterProd]) return false;
+    if (q) {
+      const hay = [r.proveedor,r.pais,r.puerto,r.vlsfo,r.mgo,r.lsmgo,r.hsfo,r.notas].join(' ').toLowerCase();
+      if (!q.split(' ').every(t=>hay.includes(t))) return false;
+    }
+    return true;
+  });
+  document.getElementById('provResultsLabel').textContent =
+    `${provFiltered.length} puerto${provFiltered.length!==1?'s':''}`;
+  renderProveedores();
+}
+
+function renderProveedores() {
+  const body = document.getElementById('provBody');
+  if (!provFiltered.length) {
+    body.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3);">Sin resultados</div>';
+    return;
+  }
+
+  // Group by pais → proveedor
+  const byPais = {};
+  provFiltered.forEach(r => {
+    const pais = r.pais || 'Otros';
+    if (!byPais[pais]) byPais[pais] = {};
+    if (!byPais[pais][r.proveedor]) byPais[pais][r.proveedor] = [];
+    byPais[pais][r.proveedor].push(r);
+  });
+
+  const paisOrder = ['Brazil','Colombia','Ecuador','Argentina','URUGUAY','PERU','CHILE'];
+  const sortedPaises = [...new Set([...paisOrder, ...Object.keys(byPais)])].filter(p => byPais[p]);
+
+  body.innerHTML = sortedPaises.map(pais => {
+    const provs = byPais[pais];
+    const flag = PAIS_FLAGS[pais] || '🌎';
+    const label = PAIS_LABELS[pais] || pais;
+
+    const cards = Object.entries(provs).map(([provNombre, puertos]) => {
+      // Collect all available products across ports
+      const prods = new Set();
+      puertos.forEach(p => {
+        if (p.vlsfo) prods.add('vlsfo');
+        if (p.mgo)   prods.add('mgo');
+        if (p.lsmgo) prods.add('lsmgo');
+        if (p.hsfo)  prods.add('hsfo');
+        if (p.ifo380) prods.add('ifo380');
+        if (p.ulsd)  prods.add('ulsd');
+      });
+
+      const prodBadges = [...prods].map(p => {
+        const labels = {vlsfo:'VLSFO',mgo:'MGO',lsmgo:'LSMGO',hsfo:'HSFO',ifo380:'IFO380',ulsd:'ULSD'};
+        return `<span class="prod-badge pb-${p}">${labels[p]}</span>`;
+      }).join('');
+
+      // Get credit terms (use first port that has it)
+      const creditPort = puertos.find(p => p.credit_terms);
+      const credit = creditPort ? creditPort.credit_terms : '';
+
+      const portRows = puertos.map(p => {
+        const entrega = [];
+        if (p.barcaza) entrega.push(`<span class="prov-port-tag blue">⛵ ${esc(p.barcaza)}</span>`);
+        if (p.camion && p.camion !== '') entrega.push(`<span class="prov-port-tag green">🚛 Camión</span>`);
+        if (p.pipe && p.pipe !== '') entrega.push(`<span class="prov-port-tag amber">🔧 Pipe</span>`);
+
+        const prodTags = [];
+        if (p.vlsfo) prodTags.push(`<span class="prov-port-tag" style="background:rgba(77,124,254,.1);color:#7aa3fe;">VLSFO</span>`);
+        if (p.mgo)   prodTags.push(`<span class="prov-port-tag" style="background:rgba(46,204,138,.1);color:#2ecc8a;">MGO</span>`);
+        if (p.lsmgo) prodTags.push(`<span class="prov-port-tag" style="background:rgba(245,166,35,.1);color:#f5a623;">LSMGO</span>`);
+        if (p.hsfo)  prodTags.push(`<span class="prov-port-tag" style="background:rgba(168,85,247,.1);color:#a855f7;">HSFO</span>`);
+        if (p.ifo380) prodTags.push(`<span class="prov-port-tag" style="background:rgba(255,92,92,.1);color:#ff5c5c;">IFO380</span>`);
+
+        const metaParts = [];
+        if (p.nombre_barcaza) metaParts.push(`🚢 ${p.nombre_barcaza}`);
+        if (p.calidades) metaParts.push(`📋 ${p.calidades}`);
+
+        return `<div class="prov-port-row" onclick="openPortModal('${esc(p.id)}')">
+          <div class="prov-port-icon">⚓</div>
+          <div style="flex:1;min-width:0;">
+            <div class="prov-port-name">${esc(p.puerto)}</div>
+            ${metaParts.length ? `<div class="prov-port-meta">${metaParts.join(' · ')}</div>` : ''}
+            <div class="prov-port-tags">
+              ${prodTags.join('')}
+              ${entrega.join('')}
+            </div>
+            ${p.notas ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${esc(p.notas)}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="prov-card">
+        <div class="prov-card-header">
+          <div>
+            <div class="prov-card-name">${esc(provNombre)}</div>
+            <div class="prov-card-pais">${flag} ${label} · ${puertos.length} puerto${puertos.length!==1?'s':''}</div>
+          </div>
+          <div class="prov-badge-wrap">${prodBadges}</div>
+        </div>
+        <div class="prov-ports">${portRows}</div>
+        <div class="prov-card-footer">
+          <div class="prov-credit">${credit ? `Crédito: <strong>${esc(credit)}</strong>` : '<span style="color:var(--text3)">Sin términos</span>'}</div>
+          <div class="prov-actions">
+            <button class="prov-btn primary" onclick="addPortToSupplier('${esc(provNombre)}','${esc(pais)}')">＋ Puerto</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="prov-pais-section">
+      <div class="prov-pais-title">${flag} ${label}</div>
+      <div class="prov-grid">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+function openPortModal(id) {
+  const p = PROV_DATA.find(x => x.id === id);
+  if (!p) return;
+  editingPortId = id;
+  editingPortProveedor = p.proveedor;
+  editingPortPais = p.pais;
+  document.getElementById('portModalTitle').textContent = `${p.proveedor} — ${p.puerto}`;
+  document.getElementById('portModalSub').textContent = `${PAIS_FLAGS[p.pais]||''} ${PAIS_LABELS[p.pais]||p.pais}`;
+  document.getElementById('pfPuerto').value       = p.puerto        || '';
+  document.getElementById('pfVlsfo').value        = p.vlsfo         || '';
+  document.getElementById('pfMgo').value          = p.mgo           || '';
+  document.getElementById('pfLsmgo').value        = p.lsmgo         || '';
+  document.getElementById('pfHsfo').value         = p.hsfo          || '';
+  document.getElementById('pfIfo380').value       = p.ifo380        || '';
+  document.getElementById('pfUlsd').value         = p.ulsd          || '';
+  document.getElementById('pfBarcaza').value      = p.barcaza       || '';
+  document.getElementById('pfCamion').value       = p.camion        || '';
+  document.getElementById('pfPipe').value         = p.pipe          || '';
+  document.getElementById('pfCredit').value       = p.credit_terms  || '';
+  document.getElementById('pfBarcazaNombre').value= p.nombre_barcaza|| '';
+  document.getElementById('pfCalidades').value    = p.calidades     || '';
+  document.getElementById('pfQuality').value      = p.quality_claim || '';
+  document.getElementById('pfNotas').value        = p.notas         || '';
+  document.getElementById('portDeleteBtn').style.display = SESSION.role==='admin' ? 'block' : 'none';
+  document.getElementById('portModalError').style.display = 'none';
+  document.getElementById('portModal').style.display = 'flex';
+}
+
+function addPortToSupplier(provNombre, pais) {
+  editingPortId = null;
+  editingPortProveedor = provNombre;
+  editingPortPais = pais;
+  document.getElementById('portModalTitle').textContent = `${provNombre} — Nuevo puerto`;
+  document.getElementById('portModalSub').textContent = `${PAIS_FLAGS[pais]||''} ${PAIS_LABELS[pais]||pais}`;
+  ['pfPuerto','pfVlsfo','pfMgo','pfLsmgo','pfHsfo','pfIfo380','pfUlsd',
+   'pfBarcaza','pfCamion','pfPipe','pfCredit','pfBarcazaNombre','pfCalidades','pfQuality','pfNotas']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('portDeleteBtn').style.display = 'none';
+  document.getElementById('portModalError').style.display = 'none';
+  document.getElementById('portModal').style.display = 'flex';
+}
+
+function closePortModal() { document.getElementById('portModal').style.display='none'; }
+
+async function savePort() {
+  const btn = document.getElementById('portSaveBtn');
+  const err = document.getElementById('portModalError');
+  err.style.display='none';
+  const puerto = document.getElementById('pfPuerto').value.trim();
+  if (!puerto) { err.textContent='El nombre del puerto es obligatorio.'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Guardando…';
+  const body = {
+    action: editingPortId ? 'updateProveedor' : 'addProveedor',
+    token: SESSION.token,
+    id: editingPortId,
+    proveedor: editingPortProveedor,
+    pais: editingPortPais,
+    puerto,
+    vlsfo:          document.getElementById('pfVlsfo').value.trim(),
+    mgo:            document.getElementById('pfMgo').value.trim(),
+    lsmgo:          document.getElementById('pfLsmgo').value.trim(),
+    hsfo:           document.getElementById('pfHsfo').value.trim(),
+    ifo380:         document.getElementById('pfIfo380').value.trim(),
+    ulsd:           document.getElementById('pfUlsd').value.trim(),
+    barcaza:        document.getElementById('pfBarcaza').value.trim(),
+    camion:         document.getElementById('pfCamion').value.trim(),
+    pipe:           document.getElementById('pfPipe').value.trim(),
+    credit_terms:   document.getElementById('pfCredit').value.trim(),
+    nombre_barcaza: document.getElementById('pfBarcazaNombre').value.trim(),
+    calidades:      document.getElementById('pfCalidades').value.trim(),
+    quality_claim:  document.getElementById('pfQuality').value.trim(),
+    notas:          document.getElementById('pfNotas').value.trim(),
+  };
+  try {
+    const res = await api(body);
+    if (res.ok) {
+      toast(editingPortId?'Puerto actualizado ✓':'Puerto añadido ✓','success');
+      CACHE.proveedores=null; closePortModal(); loadProveedores();
+    } else { err.textContent=res.error; err.style.display='block'; }
+  } catch(e) { err.textContent='Error de conexión.'; err.style.display='block'; }
+  btn.disabled=false; btn.textContent='Guardar';
+}
+
+async function deletePort() {
+  if (!editingPortId || SESSION.role!=='admin') return;
+  const p = PROV_DATA.find(x=>x.id===editingPortId);
+  if (!confirm(`¿Eliminar el puerto "${p?.puerto}" de ${p?.proveedor}?`)) return;
+  const res = await api({ action:'deleteProveedor', token:SESSION.token, id:editingPortId });
+  if (res.ok) { toast('Puerto eliminado','success'); CACHE.proveedores=null; closePortModal(); loadProveedores(); }
+  else toast(res.error,'error');
+}
+
+function openProvModal() {
+  document.getElementById('pvNombre').value=''; document.getElementById('pvPuerto').value='';
+  document.getElementById('provModalError').style.display='none';
+  document.getElementById('provModal').style.display='flex';
+}
+function closeProvModal() { document.getElementById('provModal').style.display='none'; }
+
+async function saveNewProv() {
+  const btn=document.getElementById('provSaveBtn');
+  const err=document.getElementById('provModalError');
+  err.style.display='none';
+  const nombre=document.getElementById('pvNombre').value.trim();
+  const pais=document.getElementById('pvPais').value;
+  const puerto=document.getElementById('pvPuerto').value.trim();
+  if (!nombre) { err.textContent='El nombre es obligatorio.'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Creando…';
+  const res = await api({ action:'addProveedor', token:SESSION.token,
+    proveedor:nombre, pais, puerto:puerto||'(sin puerto)', vlsfo:'',mgo:'',lsmgo:'',
+    hsfo:'',ifo380:'',ulsd:'',barcaza:'',camion:'',pipe:'',credit_terms:'',
+    nombre_barcaza:'',calidades:'',quality_claim:'',notas:'' });
+  if (res.ok) { toast('Proveedor creado ✓','success'); CACHE.proveedores=null; closeProvModal(); loadProveedores(); }
+  else { err.textContent=res.error; err.style.display='block'; }
+  btn.disabled=false; btn.textContent='Crear';
 }
 </script>
 <!-- SheetJS for Excel parsing -->
