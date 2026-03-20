@@ -826,6 +826,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
     <div style="text-align:center;padding:3rem;color:var(--text3);"><div class="spinner"></div><br>Cargando proveedores…</div>
   </div>
 </div>
+</div>
 
 <!-- ===== MODAL PUERTO (detalle/edición) ===== -->
 <div class="modal-overlay" id="portModal" style="display:none;" onclick="if(event.target===this)closePortModal()">
@@ -839,8 +840,8 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
     </div>
     <div class="modal-body">
       <div class="modal-error" id="portModalError"></div>
-      <div class="port-detail-grid">
-        <div class="form-group full" style="grid-column:1/-1;"><label>Puerto</label><input type="text" id="pfPuerto" placeholder="Nombre del puerto"></div>
+      <div class="form-grid">
+        <div class="full form-group"><label>Puerto</label><input type="text" id="pfPuerto" placeholder="Nombre del puerto"></div>
         <div class="form-group"><label>VLSFO</label><input type="text" id="pfVlsfo" placeholder="ej: VLSFO 0.5% 380 CST"></div>
         <div class="form-group"><label>MGO</label><input type="text" id="pfMgo" placeholder="ej: MGO 0.5%"></div>
         <div class="form-group"><label>LSMGO</label><input type="text" id="pfLsmgo" placeholder="ej: LSMGO 0.1%"></div>
@@ -854,8 +855,8 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
         <div class="form-group"><label>Nombre barcaza</label><input type="text" id="pfBarcazaNombre" placeholder="ej: MT China Spirit"></div>
         <div class="form-group"><label>Calidades</label><input type="text" id="pfCalidades" placeholder="ej: ISO 8217:2017"></div>
         <div class="form-group"><label>Quality Claim</label><input type="text" id="pfQuality" placeholder="ej: 21 Days"></div>
-        <div class="form-group full" style="grid-column:1/-1;"><label>Notas importantes</label>
-          <textarea id="pfNotas" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Restricciones, condiciones especiales, bunker only calls…"></textarea>
+        <div class="full form-group"><label>Notas importantes</label>
+          <textarea id="pfNotas" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Restricciones, condiciones especiales..."></textarea>
         </div>
       </div>
     </div>
@@ -899,7 +900,6 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
   </div>
 </div>
 
-</div>
 
 <!-- ===== MODAL CONTACTO ===== -->
 <div class="modal-overlay" id="contactModal" style="display:none;" onclick="if(event.target===this)closeModal()">
