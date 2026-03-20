@@ -732,7 +732,7 @@ tbody td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px
   </div>
 
   <!-- CARDS VIEW -->
-  <div id="adCardsView" style="display:none;flex:1;overflow:auto;padding:1.25rem;">
+  <div id="adCardsView" style="display:none;flex:1;overflow:auto;padding:1.25rem;width:100%;min-height:0;">
     <div id="adCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
   </div>
 </div>
@@ -1772,10 +1772,11 @@ let adCurrentView = 'list';
 function setAdView(v) {
   adCurrentView = v;
   document.getElementById('adListView').style.display  = v==='list'  ? 'flex' : 'none';
-  document.getElementById('adCardsView').style.display = v==='cards' ? 'flex' : 'none';
+  document.getElementById('adCardsView').style.display = v==='cards' ? 'block' : 'none';
   document.getElementById('adBtnList').classList.toggle('active',  v==='list');
   document.getElementById('adBtnCards').classList.toggle('active', v==='cards');
   if (v==='cards') renderAdCards();
+  if (v==='list')  renderAdList();
 }
 
 function renderAdCards() {
@@ -1814,9 +1815,8 @@ function renderAdCards() {
 }
 
 function openAdDetailCards(id) {
-  // Switch to list view and open detail
-  setAdView('list');
   openAdDetail(id);
+  setAdView('list');
 }
 let importHeaders = [];
 
